@@ -34,10 +34,6 @@ for ((i=1; i < $#; i++))
 #		echo "last line count is $lastlinecount"
 done
 
-for link in missing
-	do 
-		echo "something here: ${!link}"
-done
 
 
 
