@@ -1,9 +1,7 @@
 # gitwork
-Scripts and programs to use with markdown files.
+Scripts and programs to use with markdown files. This contains both scripts (the bash and powershell directories) and programs (forthcoming go and mono/.net directories) that perform basic tasks with markdown files. 
 
-## This contains both scripts (the bash and powershell directories) and programs (forthcoming go and mono/.net directories) that perform basic tasks with markdown files. 
-
-### Bash
+## Bash
 There are three files and two test files. The **links.sh** file extracts markdown links that contain internet reachable addresses (so that link examples in code or text are not extracted). These can be listed or piped to a file or piped to other programs. This script depends on a version of grep that takes the -o parameter to return only the selected text, and may require on Windows and Mac a newer version of grep.
 
 The **langlinks.sh** file takes a list of links and tests them to determine whether any contain a language code in a url, such as en-us, or de-de. This should work with any version of grep.
