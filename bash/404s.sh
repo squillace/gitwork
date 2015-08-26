@@ -25,12 +25,12 @@ for ((i=1; i<$(($linkstotest + 1)); i++))
 		printf "\r%d of %d... ($count bad links so far)" "$i" $linkstotest
 		result=$(curl -sL -w "%{http_code} %{url_effective}\\n" "${!i}" -o /dev/null | grep ^404)
 			if [[ "$result" ]]; then
-				printf " =====  %s\n" "$result"
+#				printf " =====  %s\n" "$result"
 				missing[$count]="$result"
 				((count++))
 			fi
 done
-
+printf "\n"
 for ((i=0; i<$count; i++))
 	do
 		echo "${missing[$i]}"
