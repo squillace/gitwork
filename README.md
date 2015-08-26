@@ -23,7 +23,7 @@ http://azure.microsoft.com/en-in/marketplace/partners/OpenLogic/
 
 The **404s** file takes a list of links and uses `curl` to make a header request (only) and follows redirects 3 deep in order to detect 404s. It has a progress indicator that lists out all responses. Obviously, requires an internet connection. Because some servers and pages do not return **precisely** the specified responses, there are some false positives, but they are rare. It's a good bulk checker, but not foolproof.
 
-As an example, the penultimate "bad" link actually returns a page in the browser; but **curl** treats the underlying network responses as bad, becoming a 404. So, while this is a good test, remember to test them yourself just in case. It's 99.5% right.
+As an example, the third-from-last "bad" link (`https://support.microsoft.com/en-us/kb/2941892`) actually returns a page in the browser; but **curl** treats the underlying network responses as bad, becoming a 404. So, while this is a good test, remember to test them yourself just in case. It's 99.5% right.
 
 ```
 ╭─[~/Workspace/scripts/gitwork/bash]─[ralph@local]─[0]─[1553]
