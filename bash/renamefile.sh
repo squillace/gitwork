@@ -29,8 +29,7 @@ if [ $(ls "$MEDIAPATH" 2>/dev/null | wc -l) -ne 0 ]; then
     echo "Moving the files in git..."
     git mv "$FILE" "vms-linux-$NEWFILE"
     echo "searching the repository for \"/$FILE\" references..."
-    echo "${_r1}$FILE"
-    find "$GITROOT" -name "*.md" -type f -exec grep -l "\\/$FILE" {} + | xargs -I {} sed -i'' -e s/"${_r1}""$FILE"/"${_r1}""$NEWFILE"/g {}    
+    find "$GITROOT" -name "*.md" -type f -exec grep -l "$FILE" {} + | xargs -I {} sed -i'' -e s/"$FILE"/"$NEWFILE"/g {}    
     for files in $(ls "$MEDIAPATH"*)
     do
         CURRENT_MEDIAFILE=${files[@]##*/}
@@ -52,7 +51,6 @@ else # the directory may exist but it is empty
     echo "moving the file in git..."
     git mv "$FILE" "vms-linux-$NEWFILE"
     git status   
-      echo ="${_r1}"\?""$FILE"
       echo "searching the repository for \"/$FILE\" references..."
-    find "$GITROOT" -name "*.md" -type f -exec grep -l "\\/$FILE" {} + | xargs -I {} sed -i'' -e s/"${_r1}""$FILE"/"${_r1}""$NEWFILE"/g {}
+    find "$GITROOT" -name "*.md" -type f -exec grep -l "$FILE" {} + | xargs -I {} sed -i'' -e s/"$FILE"/"$NEWFILE"/g {}
 fi
