@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x 
 if (( $# != 2 )); then
     echo "Illegal number of parameters; exiting..."
     exit 1;
@@ -19,15 +20,16 @@ MEDIAPATH="media/$FILESTEM/"
 echo "testing for $MEDIAPATH*.*"
 GITROOT=$(git rev-parse --show-toplevel)
 echo "Root of the git directory is: $GITROOT"
-
-
     
 if [ $(ls "$MEDIAPATH" 2>/dev/null | wc -l) -ne 0 ]; then
-    ls "$MEDIAPATH"
+#    ls "$MEDIAPATH"
     # escapes necessary to use SED properly
     _r1="${_r1//\//\\/}"
+
     echo "Moving the files in git..."
-    git mv "$FILE" "vms-linux-$NEWFILE"
+    git mv "$FILE" "$NEWFILE"
+
+    # search for and rewire all inbound links 
     echo "searching the repository for \"/$FILE\" references..."
     find "$GITROOT" -name "*.md" -type f -exec grep -l "$FILE" {} + | xargs -I {} sed -i'' -e s/"$FILE"/"$NEWFILE"/g {}    
     for files in $(ls "$MEDIAPATH"*)
@@ -48,9 +50,12 @@ if [ $(ls "$MEDIAPATH" 2>/dev/null | wc -l) -ne 0 ]; then
 else # the directory may exist but it is empty
     # escapes necessary to use SED properly
     _r1="${_r1//\//\\/}"
+
     echo "moving the file in git..."
-    git mv "$FILE" "vms-linux-$NEWFILE"
+    git mv "$FILE" "$NEWFILE"
     git status   
-      echo "searching the repository for \"/$FILE\" references..."
+
+    # search for and rewire all inbound links 
+    echo "searching the repository for \"/$FILE\" references..."
     find "$GITROOT" -name "*.md" -type f -exec grep -l "$FILE" {} + | xargs -I {} sed -i'' -e s/"$FILE"/"$NEWFILE"/g {}
 fi
