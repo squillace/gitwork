@@ -19,44 +19,45 @@ function get_tags() {
 
 function isAsm(){
     if [[ "$1" =~ .*azure-service-management.* ]]; then
-        eval "$2='true'" 
+        echo "asm"
     fi
 }
 
 function isArm(){
     if [[ "$1" =~ .*azure-resource-manager.* ]]; then
-        eval "$2='true'" 
+        echo "arm" 
     fi
 }
 
 function asm_arm_or_both(){
-    
-    case "" in 
-        *foo*)
-        echo "asm"
-        ;;
-    esac
+    infix=""
+    if [[ "$1" =~ .*azure-resource-manager.* && "$1" =~ .*azure-resource-manager.* ]]; then
+        echo "-" 
+    else 
+        if [[ "$1" =~ .*azure-resource-manager.* ]]; then
+            echo "arm-" 
+        else 
+            if [[ "$1" =~ .*azure-service-management.* ]]; then
+                echo "asm-" 
+            fi
+        
+        fi    
+    fi
+}
+
+function norm_hypens(){
+    echo $1 | sed s/_/-/g 
+}
+
+# takes tags, newnameslug, and OS to construct new name
+function build_new_name(){
+    echo "vms-linux-$(asm_arm_or_both $1)$(norm_hypens $2).md" | sed s/--/-/g
     
 }
 
-string=""
-isAsm "azure-service-management,azure-resource-manager" string
-echo "$string"
-
-string=""
-isArm "azure-service-management,azure-resource-manager" string
-echo "$string"
-
-
-return_var=''
-get_tags virtual-machines-linux-tutorial.md return_var
-echo $return_var
 
 let COUNT=0
-let tags=""
-let asm=""
-let arm=""
-
+tags=""
 while IFS=, read Assigned Title URL contentID Author MSTgtPltfrm NewNameSlug Include Windows Linux RedirectTarget
 do
     ((COUNT++))
@@ -65,8 +66,9 @@ do
         continue
     fi
     
+
     get_tags $contentID.md tags
-    isAsm 
+    
     
     echo "Assigned: $Assigned"
     echo "Title: $Title"
@@ -75,16 +77,15 @@ do
     echo "Author: $Author"
     echo "Tags: $tags"
     echo "MSTgtPltfrm: $MSTgtPltfrm"
-    echo "NewNameSlug: $NewNameSlug"
+    echo "NewNameSlug: $(norm_hypens $NewNameSlug)"
     echo "Include: $Include"
     echo "Windows: $Windows"
     echo "Linux: $Linux"
     echo "RedirectTarget: $RedirectTarget"
-    echo "is it ASM: 
-    echo ""
+    echo "newname: $(build_new_name $tags $NewNameSlug)"
     
-    
-    
+    echo ""       
+
     pause "Press ENTER to continue..."   
 done < $1
 
