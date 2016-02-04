@@ -3,6 +3,7 @@
 # establish the root of the git directory
 GITROOT=$(git rev-parse --show-toplevel)
 
+# logging configuration
 LOG=/var/log/readcsv.log
 sudo chown -R rasquill /var/log/
 
@@ -27,6 +28,7 @@ function get_tags() {
     eval "$2='$(grep -Pohr "(?<=tags=\").*" $FILEPATH | sed s/\".*//g)'"
 }
 
+# Extracts the topic title directly from the files
 function get_Title(){
     local FILEPATH=$(find "$GITROOT" -name "$1" -type f)
 #    echo "File argument is $1"
@@ -36,6 +38,7 @@ function get_Title(){
     echo "\"$(grep -Pohr -m 1 "#+.*" $FILEPATH | sed "s/# *//g" | sed "s/<.*>//g")\""
 }
 
+# Determines whether something is BOTH 
 function asm_arm_or_both(){
     infix=""
     if [[ "$1" =~ .*azure-resource-manager.* && "$1" =~ .*azure-resource-manager.* ]]; then
@@ -100,9 +103,17 @@ do
 
 
     get_tags $contentID.md tags
+
+## do the right thing here
+    
+    # if arm
+    if [[ "$tags" =~ .*azure-resource-manager.* || ! "$tags" =~ .*azure-resource-manager.* ]]; then
+        echo "****************OEN OR THE OTHER****************"
+    fi
     
     if [[ ! "$tags" =~ .*azure-resource-manager.* && ! "$tags" =~ .*azure-resource-manager.* ]]; then
-        no_tags $LOG $Assigned $URL $contentID.md Author MSTgtPltfrm $(norm_hypens $NewNameSlug) Include Windows Linux RedirectTarget
+        # log the fact that we can't do anything with this file and move on
+        no_tags $LOG $Assigned $URL $contentID.md $Author MSTgtPltfrm $(norm_hypens $NewNameSlug) $Include $Windows $Linux $RedirectTarget
         pause "Press ENTER to continue..."   
     #    continue
     fi
@@ -125,5 +136,8 @@ do
     echo ""       
 
     pause "Press ENTER to continue..."   
+    
+    source ~/workspace/gitwork/bash/renamefile.sh $contentID.md $(build_new_name $tags $NewNameSlug)
+    find $(git rev-parse --show-toplevel) -name "*.md-e" -type f -exec rm {} +
 done < $1
 

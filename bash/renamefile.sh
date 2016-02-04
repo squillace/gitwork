@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x 
+#set -x 
 if (( $# != 2 )); then
     echo "Illegal number of parameters; exiting..."
     exit 1;
@@ -15,19 +15,36 @@ else
    echo "The File '$FILE' Does Not Exist"
 fi
 
+LOG=~/redirects.txt
+
 FILESTEM=${FILE%.md}
+NEWFILESTEM=${NEWFILE%.md}
 MEDIAPATH="media/$FILESTEM/"
 echo "testing for $MEDIAPATH*.*"
 GITROOT=$(git rev-parse --show-toplevel)
 echo "Root of the git directory is: $GITROOT"
+
+## first, move the file
+echo "Moving the files in git..."
+git mv "$FILE" "$NEWFILE"
+git status
+
+# create the redirect string
+
+docURLFragment="/documentation/articles"
+
+
+echo "<add key=\"$docURLFragment/$FILESTEM/\" value=\"$docURLFragment/$NEWFILESTEM/\" /> <!-- $(date +%D) -->" >> $LOG
     
+# search for and rewire all inbound links 
+echo "searching the repository for \"/$FILE\" references..."
+find "$GITROOT" -name "*.md" -type f -exec grep -l "$FILE" {} + | xargs -I {} sed -i'' -e s/"$FILE"/"$NEWFILE"/g {}
+    
+# test for and move any media files associated with the original file
 if [ $(ls "$MEDIAPATH" 2>/dev/null | wc -l) -ne 0 ]; then
 #    ls "$MEDIAPATH"
     # escapes necessary to use SED properly
     _r1="${_r1//\//\\/}"
-
-    echo "Moving the files in git..."
-    git mv "$FILE" "$NEWFILE"
 
     # search for and rewire all inbound links 
     echo "searching the repository for \"/$FILE\" references..."
@@ -35,7 +52,7 @@ if [ $(ls "$MEDIAPATH" 2>/dev/null | wc -l) -ne 0 ]; then
     for files in $(ls "$MEDIAPATH"*)
     do
         CURRENT_MEDIAFILE=${files[@]##*/}
-        NEWFILESTEM=${NEWFILE%.md}
+        
         NEWPATH="media/$NEWFILESTEM/$CURRENT_MEDIAFILE"
         echo "Stem of original file: $FILESTEM"
         echo "Stem of the new file: $NEWFILESTEM"
@@ -47,15 +64,4 @@ if [ $(ls "$MEDIAPATH" 2>/dev/null | wc -l) -ne 0 ]; then
 
     done
 
-else # the directory may exist but it is empty
-    # escapes necessary to use SED properly
-    _r1="${_r1//\//\\/}"
-
-    echo "moving the file in git..."
-    git mv "$FILE" "$NEWFILE"
-    git status   
-
-    # search for and rewire all inbound links 
-    echo "searching the repository for \"/$FILE\" references..."
-    find "$GITROOT" -name "*.md" -type f -exec grep -l "$FILE" {} + | xargs -I {} sed -i'' -e s/"$FILE"/"$NEWFILE"/g {}
 fi
