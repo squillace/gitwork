@@ -3,6 +3,13 @@
 # establish the root of the git directory
 GITROOT=$(git rev-parse --show-toplevel)
 
+LOG=/var/log/readcsv.log
+sudo chown -R rasquill /var/log/
+
+timestamp() {
+  date +"%T"
+}
+
 # for testing, pauses with a message until ENTER is pressed
 function pause(){
    read -p "$*" input </dev/tty
@@ -28,21 +35,6 @@ function get_Title(){
     
     echo "\"$(grep -Pohr -m 1 "#+.*" $FILEPATH | sed "s/# *//g" | sed "s/<.*>//g")\""
 }
-
-# returns "asm" if the argument has azure-service-management in it
-function isAsm(){
-    if [[ "$1" =~ .*azure-service-management.* ]]; then
-        echo "asm"
-    fi
-}
-
-# returns "arm" if the argument has azure-resource-manager in it
-function isArm(){
-    if [[ "$1" =~ .*azure-resource-manager.* ]]; then
-        echo "arm" 
-    fi
-}
-
 
 function asm_arm_or_both(){
     infix=""
@@ -70,39 +62,54 @@ function build_new_name(){
     echo "vms-linux-$(asm_arm_or_both $1)$(norm_hypens $2).md" | sed s/--/-/g
 }
 
+function no_tags()
+{
+            echo ""
+            echo "=================================================================================================================" >> $1
+            echo "$(timestamp): $contentID.md, line $COUNT =================>>>>>>>>>>> Doesn't have any tag for deployment" >> $1
+            echo "$(timestamp): Assigned: $Assigned"  >> $1
+            echo "$(timestamp): Title: $(get_Title $contentID.md)" >> $1
+            echo "$(timestamp): URL: $URL" >> $1
+            echo "$(timestamp): contentID: $contentID" >> $1
+            echo "$(timestamp): Author: $Author" >> $1
+            echo "$(timestamp): Tags: $tags" >> $1
+            echo "$(timestamp): MSTgtPltfrm: $MSTgtPltfrm" >> $1
+            echo "$(timestamp): NewNameSlug: $(norm_hypens $NewNameSlug)" >> $1
+            echo "$(timestamp): Include: $Include" >> $1
+            echo "$(timestamp): Windows: $Windows" >> $1
+            echo "$(timestamp): Linux: $Linux" >> $1
+            echo "$(timestamp): RedirectTarget: $RedirectTarget" >> $1
+            
+            
+}
+
+echo "Log file is: $LOG."
+echo "Starting run: $(date)." >> $LOG
 
 let COUNT=0
 tags=""
 while IFS=, read Assigned URL contentID Author MSTgtPltfrm NewNameSlug Include Windows Linux RedirectTarget
 do
     ((COUNT++))
-#    echo "$COUNT"
+    echo "Reading line: $COUNT"
     if [ "$COUNT" -eq 1 ]; then
+        echo "$timestamp: Header line read."
         continue
-        get_tags $contentID.md tags
 
-        fi
-        if [[ ! "$tags" =~ .*azure-resource-manager.* && ! "$tags" =~ .*azure-resource-manager.* ]]; then
-            echo "$contentID.md =================>>>>>>>>>>> Doesn't have any tag for deployment" 
-                echo "Assigned: $Assigned"
-                echo "Title: $(get_Title $contentID.md)"
-                echo "URL: $URL"
-                echo "contentID: $contentID"
-                echo "Author: $Author"
-                echo "Tags: $tags"
-                echo "MSTgtPltfrm: $MSTgtPltfrm"
-                echo "NewNameSlug: $(norm_hypens $NewNameSlug)"
-                echo "Include: $Include"
-                echo "Windows: $Windows"
-                echo "Linux: $Linux"
-                echo "RedirectTarget: $RedirectTarget"
-                echo "newname: $(build_new_name $tags $NewNameSlug)"
-                    pause "Press ENTER to continue..."   
-            continue
+    fi
+
+
+    get_tags $contentID.md tags
+    
+    if [[ ! "$tags" =~ .*azure-resource-manager.* && ! "$tags" =~ .*azure-resource-manager.* ]]; then
+        no_tags $LOG $Assigned $URL $contentID.md Author MSTgtPltfrm $(norm_hypens $NewNameSlug) Include Windows Linux RedirectTarget
+        pause "Press ENTER to continue..."   
+    #    continue
     fi
     
+    
     echo "Assigned: $Assigned"
-    echo "Title: $Title"
+    echo "Title: $(get_Title $contentID.md)"
     echo "URL: $URL"
     echo "contentID: $contentID"
     echo "Author: $Author"
