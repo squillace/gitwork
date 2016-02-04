@@ -15,7 +15,7 @@ else
    echo "The File '$FILE' Does Not Exist"
 fi
 
-LOG=~/redirects.txt
+RedirectLOG=~/redirects.txt
 
 FILESTEM=${FILE%.md}
 NEWFILESTEM=${NEWFILE%.md}
@@ -34,7 +34,7 @@ git status
 docURLFragment="/documentation/articles"
 
 
-echo "<add key=\"$docURLFragment/$FILESTEM/\" value=\"$docURLFragment/$NEWFILESTEM/\" /> <!-- $(date +%D) -->" >> $LOG
+echo "<add key=\"$docURLFragment/$FILESTEM/\" value=\"$docURLFragment/$NEWFILESTEM/\" /> <!-- $(date +%D) -->" >> $RedirectLOG
     
 # search for and rewire all inbound links 
 echo "searching the repository for \"/$FILE\" references..."

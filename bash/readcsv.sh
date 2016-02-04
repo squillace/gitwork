@@ -4,7 +4,7 @@
 GITROOT=$(git rev-parse --show-toplevel)
 
 # logging configuration
-LOG=/var/log/readcsv.log
+CSVLOG=/var/log/readcsv.log
 sudo chown -R rasquill /var/log/
 
 timestamp() {
@@ -86,8 +86,8 @@ function no_tags()
             
 }
 
-echo "Log file is: $LOG."
-echo "Starting run: $(date)." >> $LOG
+echo "Log file is: $CSVLOG."
+echo "Starting run: $(date)." >> $CSVLOG
 
 let COUNT=0
 tags=""
