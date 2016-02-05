@@ -32,8 +32,6 @@ git status
 # create the redirect string
 
 docURLFragment="/documentation/articles"
-
-
 echo "<add key=\"$docURLFragment/$FILESTEM/\" value=\"$docURLFragment/$NEWFILESTEM/\" /> <!-- $(date +%D) -->" >> $RedirectLOG
     
 # search for and rewire all inbound links 

@@ -1,10 +1,10 @@
 #!/bin/bash
-
+# set -x
 # establish the root of the git directory
 GITROOT=$(git rev-parse --show-toplevel)
 
 # logging configuration
-CSVLOG=/var/log/readcsv.log
+LOG=/var/log/readcsv.log
 sudo chown -R rasquill /var/log/
 
 timestamp() {
@@ -62,6 +62,8 @@ function norm_hypens(){
 
 # takes tags, newnameslug, and OS to construct new name
 function build_new_name(){
+    local new_name=""
+    
     echo "vms-linux-$(asm_arm_or_both $1)$(norm_hypens $2).md" | sed s/--/-/g
 }
 
@@ -86,8 +88,8 @@ function no_tags()
             
 }
 
-echo "Log file is: $CSVLOG."
-echo "Starting run: $(date)." >> $CSVLOG
+echo "Log file is: $LOG."
+echo "Starting run: $(date)." >> $LOG
 
 let COUNT=0
 tags=""
@@ -103,19 +105,17 @@ do
 
 
     get_tags $contentID.md tags
-
-## do the right thing here
     
-    # if arm
-    if [[ "$tags" =~ .*azure-resource-manager.* || ! "$tags" =~ .*azure-resource-manager.* ]]; then
-        echo "****************OEN OR THE OTHER****************"
-    fi
-    
-    if [[ ! "$tags" =~ .*azure-resource-manager.* && ! "$tags" =~ .*azure-resource-manager.* ]]; then
+    if [[ ! "$tags" =~ .*azure-resource-manager.* && ! "$tags" =~ .*azure-service-management.* ]]; then
+        
+        echo "hey, we don't have either tag here!!!!!!!!!!!!!!!"
+        if [[ "$NewNameSlug" =~ .*asm.* ]]; then
+            echo "BUT is does have asm in $NewNameSlug..."
+        fi
         # log the fact that we can't do anything with this file and move on
         no_tags $LOG $Assigned $URL $contentID.md $Author MSTgtPltfrm $(norm_hypens $NewNameSlug) $Include $Windows $Linux $RedirectTarget
         pause "Press ENTER to continue..."   
-    #    continue
+        continue
     fi
     
     
@@ -137,7 +137,7 @@ do
 
     pause "Press ENTER to continue..."   
     
-    source ~/workspace/gitwork/bash/renamefile.sh $contentID.md $(build_new_name $tags $NewNameSlug)
-    find $(git rev-parse --show-toplevel) -name "*.md-e" -type f -exec rm {} +
+    #source ~/workspace/gitwork/bash/renamefile.sh $contentID.md $(build_new_name $tags $NewNameSlug)
+    #find $(git rev-parse --show-toplevel) -name "*.md-e" -type f -exec rm {} +
 done < $1
 
