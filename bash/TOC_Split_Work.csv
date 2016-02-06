@@ -1,23 +1,23 @@
 Assignments,URL,ContentId,Author,MSTgtPltfrm,New Name Slug,Include,Windows ,Linux,Redirect to:
-cynthn,https://azure.microsoft.com/en-us/documentation/articles/cloud-services-connect-virtual-machine/,cloud-services-connect-virtual-machine,cynthn,vm-multiple,asm_connect_vms_classic,_ ,_ ,_ ,Linux
-cynthn,https://azure.microsoft.com/en-us/documentation/articles/storage-windows-attach-disk/,storage-windows-attach-disk,cynthn,vm-windows,asm_attach_disk_classic,,_ ,,
+cynthn,https://azure.microsoft.com/en-us/documentation/articles/cloud-services-connect-virtual-machine/,cloud-services-connect-virtual-machine,cynthn,vm-multiple,asm_connect_vms,_ ,_ ,_ ,Linux
+cynthn,https://azure.microsoft.com/en-us/documentation/articles/storage-windows-attach-disk/,storage-windows-attach-disk,cynthn,vm-windows,asm_attach_disk,,_ ,,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/storage-windows-detach-disk/,storage-windows-detach-disk,cynthn,vm-windows,asm_detach_disk,,_ ,,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-about/,virtual-machines-about,cynthn,na,about,_ ,_ ,_ ,Linux
-cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-attach-disk-preview/,virtual-machines-attach-disk-preview,cynthn,vm-multiple,attach_disk_portal,_ ,_ ,_ ,Windows
-cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-capture-image-windows-server/,virtual-machines-capture-image-windows-server,cynthn,vm-windows,capture_windows _classic,,_ ,,
+cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-attach-disk-preview/,virtual-machines-attach-disk-preview,cynthn,vm-multiple,arm_attach_disk_portal,_ ,_ ,_ ,Windows
+cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-capture-image-windows-server/,virtual-machines-capture-image-windows-server,cynthn,vm-windows,asm_capture_image,,_ ,,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-configuring-oracle-data-guard/,virtual-machines-configuring-oracle-data-guard,bbenz,vm-windows,asm_configure_oracle_data_guard,,_ ,,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-configuring-oracle-goldengate/,virtual-machines-configuring-oracle-goldengate,bbenz,vm-windows,asm_configure_oracle_goldengate,,_ ,,
-cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-create-custom/,virtual-machines-create-custom,cynthn,vm-multiple,create_VM_portal,_ ,_ ,_ ,Windows
-cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-create-upload-vhd-windows-server/,virtual-machines-create-upload-vhd-windows-server,cynthn,vm-windows,create_vm_upload_vhd_classic,,_ ,,
+cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-create-custom/,virtual-machines-create-custom,cynthn,vm-multiple,asm_create_vm_portal,_ ,_ ,_ ,Windows
+cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-create-upload-vhd-windows-server/,virtual-machines-create-upload-vhd-windows-server,cynthn,vm-windows,asm_create_vm_upload_vhd,,_ ,,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-creating-oracle-database-virtual-machine/,virtual-machines-creating-oracle-database-virtual-machine,bbenz,Windows,asm_create_oracle_database_vm,,_ ,,
-cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-creating-oracle-weblogic-server-12c-oracle-database-12c-virtual-machine/,virtual-machines-creating-oracle-weblogic-server-12c-oracle-database-12c-virtual-machine,bbenz,vm-windows,create_oracle_weblogic_server_12c_database_vm,,_ ,,
-cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-creating-oracle-weblogic-server-12c-virtual-machine/,virtual-machines-creating-oracle-weblogic-server-12c-virtual-machine,bbenz,na,create_oracle_weblogic_server_12c_vm,,_ ,,
+cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-creating-oracle-weblogic-server-12c-oracle-database-12c-virtual-machine/,virtual-machines-creating-oracle-weblogic-server-12c-oracle-database-12c-virtual-machine,bbenz,vm-windows,arm_create_oracle_weblogic_server_12c_database_vm,,_ ,,
+cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-creating-oracle-weblogic-server-12c-virtual-machine/,virtual-machines-creating-oracle-weblogic-server-12c-virtual-machine,bbenz,na,arm_create_oracle_weblogic_server_12c_vm,,_ ,,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-disks-vhds/,virtual-machines-disks-vhds,cynthn,na,about_disks_vhds,_ ,_ ,_ ,Linux
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-docker-registry-on-azure-blob-storage/,virtual-machines-docker-registry-on-azure-blob-storage,ahmetb,vm-linux,docker_registry_in_blob_storage,,,_ ,
-cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-dotnet-create-visual-studio-powershell/,virtual-machines-dotnet-create-visual-studio-powershell,tarcher,vm-multiple,web_app_visual_studio,_ ,_ ,_ ,Windows
-cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-dotnet-run-compute-intensive-task/,virtual-machines-dotnet-run-compute-intensive-task,wpickett,vm-windows,run_compute_intensive_task,,_ ,,
-cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-how-to-configure-availability/,virtual-machines-how-to-configure-availability,cynthn,vm-multiple,configure_availability,_ ,_ ,_ ,Windows
-cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-images/,virtual-machines-images,cynthn,vm-multiple,about_images,_ ,_ ,_ ,Linux
+cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-dotnet-create-visual-studio-powershell/,virtual-machines-dotnet-create-visual-studio-powershell,tarcher,vm-multiple,asm_web_app_visual_studio,_ ,_ ,_ ,Windows
+cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-dotnet-run-compute-intensive-task/,virtual-machines-dotnet-run-compute-intensive-task,wpickett,vm-windows,asm_run_compute_intensive_task,,_ ,,
+cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-how-to-configure-availability/,virtual-machines-how-to-configure-availability,cynthn,vm-multiple,asm_configure_availability,_ ,_ ,_ ,Windows
+cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-images/,virtual-machines-images,cynthn,vm-multiple,asm_about_images,_ ,_ ,_ ,Linux
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-create-upload-vhd-centos/,virtual-machines-linux-create-upload-vhd-centos,szarkos,vm-linux,create_upload_centos,,,_ ,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-create-upload-vhd-generic/,virtual-machines-linux-create-upload-vhd-generic,szarkos,vm-linux,create_upload_generic,,,_ ,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-create-upload-vhd-ubuntu/,virtual-machines-linux-create-upload-vhd-ubuntu,szarkos,vm-linux,create_upload_ubuntu,,,_ ,
@@ -28,30 +28,30 @@ cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-nodejs-running-cassandra/,virtual-machines-linux-nodejs-running-cassandra,robmcm,vm-linux,cassandra_nodejs,,,_ ,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-usernames/,virtual-machines-linux-usernames,szark,vm-linux,linux_usernames,,,_ ,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-use-root-privileges/,virtual-machines-linux-use-root-privileges,szark,vm-linux,use_root_privileges,,,_ ,
-cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-use-vmaccess-reset-password-or-ssh/,virtual-machines-linux-use-vmaccess-reset-password-or-ssh,cynthn,vm-linux,reset_access_vmaccess,,,_ ,
-cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-log-on-windows-server/,virtual-machines-log-on-windows-server,cynthn,vm-windows,connect_logon_classic,,_ ,,
-cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-log-on-windows-server-preview/,virtual-machines-log-on-windows-server-preview,cynthn,vm-windows,connect_logon ,,_ ,,
+cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-use-vmaccess-reset-password-or-ssh/,virtual-machines-linux-use-vmaccess-reset-password-or-ssh,cynthn,vm-linux,asm_reset_access_vmaccess,,,_ ,
+cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-log-on-windows-server/,virtual-machines-log-on-windows-server,cynthn,vm-windows,asm_connect_logon,,_ ,,
+cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-log-on-windows-server-preview/,virtual-machines-log-on-windows-server-preview,cynthn,vm-windows,arm_connect_logonæ,,_ ,,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-mariadb-cluster/,virtual-machines-mariadb-cluster,v-ahsab,vm-linux,asm_mariadb_mysql_cluster,,,_ ,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-migrate-onpremises-database/,virtual-machines-migrate-onpremises-database,carlrab,vm-windows-sql-server,asm_migrate_sql,,_ ,,
-cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-miscellaneous-considerations-oracle-virtual-machine-images/,virtual-machines-miscellaneous-considerations-oracle-virtual-machine-images,bbenz,vm-windows,asm_oracle_considerations,,,_ ,
+cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-miscellaneous-considerations-oracle-virtual-machine-images/,virtual-machines-miscellaneous-considerations-oracle-virtual-machine-images,bbenz,vm-windows,asm_oracle_considerations,,_ ,,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-mysql-windows-server-2008r2/,virtual-machines-mysql-windows-server-2008r2,cynthn,vm-windows,asm_mysql_2008r2,,_ ,,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-oracle-azure-virtual-machines/,virtual-machines-oracle-azure-virtual-machines,bbenz,Windows,asm_oracle ,_ ,_ ,_ ,Linux
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-oracle-list-oracle-virtual-machine-images/,virtual-machines-oracle-list-oracle-virtual-machine-images,bbenz,vm-multiple,asm_oracle_images,_ ,_ ,_ ,Linux
-cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-prepare-oracle-linux-virtual-machine/,virtual-machines-prepare-oracle-linux-virtual-machine,bbenz,vm-linux,asm_prepare_oracle,,,_ ,
-cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-ps-create-preconfigure-linux-vms/,virtual-machines-ps-create-preconfigure-linux-vms,cynthn,vm-linux,asm_create_linux_vm_powershell,,,_ ,
-cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-ps-create-preconfigure-windows-resource-manager-vms/,virtual-machines-ps-create-preconfigure-windows-resource-manager-vms,cynthn,na,arm_create_windows_powershell,,_ ,,
-cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-ps-create-preconfigure-windows-vms/,virtual-machines-ps-create-preconfigure-windows-vms,cynthn,vm-windows,asm_create_windows_powershell,,_ ,,
-cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-python-ipython-notebook/,virtual-machines-python-ipython-notebook,crwilcox,vm-linux,jupyter_notebookæ,,,_ ,
+cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-prepare-oracle-linux-virtual-machine/,virtual-machines-prepare-oracle-linux-virtual-machine,bbenz,vm-linux,prepare_oracle,,,_ ,
+cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-ps-create-preconfigure-linux-vms/,virtual-machines-ps-create-preconfigure-linux-vms,cynthn,vm-linux,asm_create_vm_powershell,,,_ ,
+cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-ps-create-preconfigure-windows-resource-manager-vms/,virtual-machines-ps-create-preconfigure-windows-resource-manager-vms,cynthn,na,arm_create_powershell,,_ ,,
+cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-ps-create-preconfigure-windows-vms/,virtual-machines-ps-create-preconfigure-windows-vms,cynthn,vm-windows,asm_create_powershell,,_ ,,
+cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-python-ipython-notebook/,virtual-machines-python-ipython-notebook,crwilcox,vm-linux,arm_jupyter_notebookæ,,,_ ,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-questions/,virtual-machines-questions,cynthn,vm-multiple,asm_faq,_ ,_ ,_ ,Linux
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-redis-template/,virtual-machines-redis-template,twieman,vm-windows,arm_redis_template,,_ ,,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-set-up-endpoints/,virtual-machines-set-up-endpoints,cynthn,vm-multiple,asm_setup_endpoints,_ ,_ ,_ ,Windows
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/,virtual-machines-size-specs,cynthn,vm-multiple,sizes,_ ,_ ,_ ,Linux
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-change-drive-letter/,virtual-machines-windows-change-drive-letter,cynthn,vm-windows,asm_change_drive_letter,,_ ,,
-cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-choices-create-vm/,virtual-machines-windows-choices-create-vm,cynthn,vm-windows,create_windows_choices,,_ ,,
+cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-choices-create-vm/,virtual-machines-windows-choices-create-vm,cynthn,vm-windows,arm_create_choices,,_ ,,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-tutorial/,virtual-machines-windows-tutorial,cynthn,vm-windows,arm_tutorial,,_ ,,
-cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-tutorial-classic-portal/,virtual-machines-windows-tutorial-classic-portal,cynthn,vm-windows,asm_tutorial_classic,,_ ,,
+cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-tutorial-classic-portal/,virtual-machines-windows-tutorial-classic-portal,cynthn,vm-windows,asm_tutorial,,_ ,,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/vs-azure-tools-virtual-machines-create-manage/,vs-azure-tools-virtual-machines-create-manage,tarcher,na,manage_vms_visual_studio,_ ,_ ,_ ,Windows
-danlep,https://azure.microsoft.com/en-us/documentation/articles/acs-intro/,acs-intro,rogardle,na,,,,,
+danlep,https://azure.microsoft.com/en-us/documentation/articles/acs-intro/,acs-intro,rogardle,na,acs_intro,,,_ ,
 danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-a8-a9-a10-a11-specs/,virtual-machines-a8-a9-a10-a11-specs,danlep,vm-multiple,a8_a9_a10_a11_specs,_ ,_ ,_ ,Windows
 danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-allocation-failure/,virtual-machines-allocation-failure,kenazk,ibiza,allocation_failure,_ ,_ ,_ ,Windows
 danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-azurerm-versus-azuresm/,virtual-machines-azurerm-versus-azuresm,mahthi,vm-multiple,arm_asm_compare,_ ,_ ,_ ,Windows
@@ -61,20 +61,20 @@ danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines
 danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-extensions-configuration-samples-linux/,virtual-machines-extensions-configuration-samples-linux,kundanap,vm-linux,arm_extensions_configuration_samples,,,_ ,
 danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-extensions-configuration-samples-windows/,virtual-machines-extensions-configuration-samples-windows,kundanap,vm-windows,arm_extensions_configuration_samples,,_ ,,
 danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-extensions-customscript/,virtual-machines-extensions-customscript,kundanap,vm-windows,asm_extensions_customscript,,_ ,,
-danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-extensions-customscript-with-template/,virtual-machines-extensions-customscript-with-template,kundanap,vm-multiple,arm_extensions_customscript,,,,
+danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-extensions-customscript-with-template/,virtual-machines-extensions-customscript-with-template,kundanap,vm-multiple,arm_extensions_customscript,_ ,,,
 danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-extensions-diagnostics-windows-powershell/,virtual-machines-extensions-diagnostics-windows-powershell,saurabh,vm-windows,arm_psh_extensions_diagnostics,,_ ,,
 danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-extensions-diagnostics-windows-template/,virtual-machines-extensions-diagnostics-windows-template,saurabh,vm-windows,arm_extensions_diagnostics_template,,_ ,,
 danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-extensions-troubleshooting/,virtual-machines-extensions-troubleshooting,kundanap,na,arm_extensions_troubleshoot,_ ,_ ,_ ,Windows
 danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-freebsd-create-upload-vhd/,virtual-machines-freebsd-create-upload-vhd,kyliel,vm-linux,asm_freebsd_create_upload_vhd,,,_ ,
-danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-hpcpack-cluster-headnode/,virtual-machines-hpcpack-cluster-headnode,danlep,vm-multiple,asm_hpcpack_cluster_headnode,,_ ,,
+danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-hpcpack-cluster-headnode/,virtual-machines-hpcpack-cluster-headnode,danlep,vm-multiple,arm_hpcpack_cluster_headnode,,_ ,,
 danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-hpcpack-cluster-node-autogrowshrink/,virtual-machines-hpcpack-cluster-node-autogrowshrink,danlep,vm-multiple,asm_hpcpack_cluster_node_autogrowshrink,,_ ,,
 danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-hpcpack-cluster-node-burst/,virtual-machines-hpcpack-cluster-node-burst,danlep,vm-multiple,asm_hpcpack_cluster_node_burst,,_ ,,
 danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-hpcpack-cluster-node-manage/,virtual-machines-hpcpack-cluster-node-manage,danlep,vm-multiple,asm_hpcpack_cluster_node_manage,,_ ,,Windows
 danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-hpcpack-cluster-options/,virtual-machines-hpcpack-cluster-options,danlep,vm-multiple,hpcpack_cluster_options,_ ,_ ,_ ,
-danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-hpcpack-cluster-powershell-script/,virtual-machines-hpcpack-cluster-powershell-script,danlep,vm-multiple,hpcpack_cluster_powershell_script,_ ,_ ,_ ,Windows
+danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-hpcpack-cluster-powershell-script/,virtual-machines-hpcpack-cluster-powershell-script,danlep,vm-multiple,asm_hpcpack_cluster_powershell_script,_ ,_ ,_ ,Windows
 danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-hpcpack-cluster-submit-jobs/,virtual-machines-hpcpack-cluster-submit-jobs,danlep,vm-multiple,hpcpack_cluster_submit_jobs,,_ ,,
 danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-agent-user-guide/,virtual-machines-linux-agent-user-guide,mingzhan,vm-linux,linux_agent_user_guide,,,_ ,
-danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-capture-image-resource-manager/,virtual-machines-linux-capture-image-resource-manager,danlep,vm-linux,arm_capture_image,,,_ ,
+danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-capture-image-resource-manager/,virtual-machines-linux-capture-image-resource-manager,danlep,vm-linux,arm_capture_linux_image,,,_ ,
 danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-cluster-hpcpack/,virtual-machines-linux-cluster-hpcpack,danlep,vm-multiple,asm_hpcpack_linux_cluster,,,_ ,
 danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-cluster-hpcpack-namd/,virtual-machines-linux-cluster-hpcpack-namd,danlep,vm-linux,asm_hpcpack_linux_cluster_namd,,,_ ,
 danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-cluster-hpcpack-openfoam/,virtual-machines-linux-cluster-hpcpack-openfoam,danlep,vm-linux,asm_hpcpack_linux_cluster_openfoam,,,_ ,
@@ -97,13 +97,12 @@ danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines
 danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-manage-vms-powershell/,virtual-machines-manage-vms-powershell,kasing,vm-windows,asm_manage_psh,,_ ,,
 danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-ruby-rails-web-app-linux/,virtual-machines-ruby-rails-web-app-linux,robmcm,vm-linux,asm_ruby_rails_web_app,,,_ ,
 danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-sap-getting-started/,virtual-machines-sap-getting-started,sedusch,vm-multiple,asm_sap_get_started,_ ,_ ,_ ,Windows
-danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-service-management-articles/,virtual-machines-service-management-articles,danlep,vm-multiple,asm_articles,_ ,_ ,_ ,Windows
 danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-sql-server-application-patterns-and-development-strategies/,virtual-machines-sql-server-application-patterns-and-development-strategies,selcint,vm-windows-sql-server,sql_server_app_patterns_dev_strategies,,_ ,,
 danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-sql-server-provision-resource-manager/,virtual-machines-sql-server-provision-resource-manager,mikeray,vm-windows-sql-server,arm_portal_sql_server_provision,,_ ,,
 danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-sql-server-use-premium-storage/,virtual-machines-sql-server-use-premium-storage,jroth,vm-windows-sql-server,asm_sql_server_premium_storage,,_ ,,
 danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-sql-server-use-reportviewer-in-a-web-site/,virtual-machines-sql-server-use-reportviewer-in-a-web-site,jroth,vm-windows-sql-server,asm_sql_server_reportviewer,,_ ,,
 danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-hpcpack-cluster-rdma/,virtual-machines-windows-hpcpack-cluster-rdma,danlep,vm-windows,asm_hpcpack_rdma_cluster,,_ ,,
-danlep,https://azure.microsoft.com/en-us/documentation/articles/xplat-cli-azure-manage-vm-asm-arm/,xplat-cli-azure-manage-vm-asm-arm,danlep,command-line-interface,arm_asm_cli_manage,_ ,_ ,_ ,Linux
+danlep,https://azure.microsoft.com/en-us/documentation/articles/xplat-cli-azure-manage-vm-asm-arm/,xplat-cli-azure-manage-vm-asm-arm,danlep,command-line-interface,cli_manage,_ ,_ ,_ ,Linux
 davidmu,https://azure.microsoft.com/en-us/documentation/articles/arm-template-deployment/,arm-template-deployment,davidmu,vm-windows,#REF!,,_ ,,
 davidmu,https://azure.microsoft.com/en-us/documentation/articles/automation-manage-virtual-machines/,automation-manage-virtual-machines,jolevy,na,#REF!,,_ ,,
 davidmu,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-arm-deployment/,virtual-machines-arm-deployment,davidmu,vm-windows,#REF!,,_ ,,
@@ -112,7 +111,6 @@ davidmu,https://azure.microsoft.com/en-us/documentation/articles/virtual-machine
 davidmu,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-base-configuration-test-environment-resource-manager/,virtual-machines-base-configuration-test-environment-resource-manager,josephd,Windows,#REF!,,_ ,,
 davidmu,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-create-windows-powershell-resource-manager/,virtual-machines-create-windows-powershell-resource-manager,davidmu,na,#REF!,,_ ,,
 davidmu,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-create-windows-powershell-resource-manager-template/,virtual-machines-create-windows-powershell-resource-manager-template,davidmu,vm-windows,#REF!,,_ ,,
-davidmu,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-create-windows-powershell-resource-manager-template-simple/,virtual-machines-create-windows-powershell-resource-manager-template-simple,davidmu,vm-windows,#REF!,,_ ,,
 davidmu,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-deploy-rmtemplates-powershell/,virtual-machines-deploy-rmtemplates-powershell,davidmu,na,#REF!,,_ ,,
 davidmu,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-hybrid-cloud-test-environments/,virtual-machines-hybrid-cloud-test-environments,josephd,Windows,#REF!,,_ ,,
 davidmu,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-mysql-cluster/,virtual-machines-linux-mysql-cluster,jparrel,vm-linux,#REF!,,,_ ,
@@ -154,13 +152,10 @@ davidmu,https://azure.microsoft.com/en-us/documentation/articles/virtual-machine
 davidmu,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-workload-intranet-sharepoint-phase3/,virtual-machines-workload-intranet-sharepoint-phase3,josephd,Windows,#REF!,,_ ,,
 davidmu,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-workload-intranet-sharepoint-phase4/,virtual-machines-workload-intranet-sharepoint-phase4,josephd,Windows,#REF!,,_ ,,
 davidmu,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-workload-intranet-sharepoint-phase5/,virtual-machines-workload-intranet-sharepoint-phase5,josephd,Windows,#REF!,,_ ,,
-davidmu,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-workload-template-ad-domain/,virtual-machines-workload-template-ad-domain,davidmu,vm-windows,#REF!,,_ ,,
-davidmu,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-workload-template-sharepoint/,virtual-machines-workload-template-sharepoint,josephd,vm-windows-sharepoint,#REF!,,_ ,,
-davidmu,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-workload-template-wordpress/,virtual-machines-workload-template-wordpress,davidmu,vm-linux,#REF!,,_ ,,
 dkshir,https://azure.microsoft.com/en-us/documentation/articles/resource-group-create-work-id-from-personal/,resource-group-create-work-id-from-personal,rasquill,na,create_aad_work_id,_ ,_ ,_ ,Windows
 dkshir,https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/,resource-groups-vm-searching,rasquill,command-line-interface,arm_cli_ps_find_vm_image,_ ,_ ,_ ,Linux
 dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-app-frameworks/,virtual-machines-app-frameworks,rasquill,NA,arm_app_frameworks,_ ,_ ,_ ,Linux
-dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-create-fqdn-on-portal/,virtual-machines-create-fqdn-on-portal,dkshir,na,arm_portal_create_fqdn,_ ,_ ,_ ,N/A
+dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-create-fqdn-on-portal/,virtual-machines-create-fqdn-on-portal,dkshir,na,arm_portal_create_fqdn,_ ,_ ,_ ,Linux
 dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-deis-cluster/,virtual-machines-deis-cluster,hbai,vm-linux,arm_deis_cluster,,,_ ,
 dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-deploy-rmtemplates-azure-cli/,virtual-machines-deploy-rmtemplates-azure-cli,rasquill,na,arm_cli_deploy_templates,_ ,_ ,_ ,Linux
 dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-docker-machine/,virtual-machines-docker-machine,rasquill,vm-linux,asm_docker_machine,,,_ ,
@@ -174,7 +169,7 @@ dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines
 dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-extensions-install/,virtual-machines-extensions-install,rasquill,vm-multiple,asm_manage_extensions,_ ,_ ,_ ,Windows
 dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-extensions-log-collector/,virtual-machines-extensions-log-collector,rasquill,nad,log_collector_extension,_ ,_ ,_ ,Windows
 dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-how-to-inject-custom-data/,virtual-machines-how-to-inject-custom-data,rasquill,vm-windows,asm_inject_custom_data,_ ,_ ,_ ,Windows
-dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-infrastructure-services-implementation-guidelines/,virtual-machines-infrastructure-services-implementation-guidelines,rasquill,na,infrastructure_service_guidelines,_ ,_ ,_ ,N/A
+dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-infrastructure-services-implementation-guidelines/,virtual-machines-infrastructure-services-implementation-guidelines,rasquill,na,infrastructure_service_guidelines,_ ,_ ,_ ,Linux
 dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-install-mongodb-windows-server/,virtual-machines-install-mongodb-windows-server,dkshir,vm-windows,asm_install_mongodb,,_ ,,
 dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-install-symantec/,virtual-machines-install-symantec,dkshir,vm-multiple,asm_install_symantec,,_ ,,
 dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-install-trend/,virtual-machines-install-trend,dkshir,vm-multiple,asm_install_trend,,_ ,,
@@ -193,16 +188,15 @@ dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines
 dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-tutorial/,virtual-machines-linux-tutorial,rasquill,vm-linux,arm_cli_create_vm,,,_ ,
 dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-tutorial-portal-rm/,virtual-machines-linux-tutorial-portal-rm,rasquill,vm-linux,arm_portal_create_vm,,,_ ,
 dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-use-ssh-key/,virtual-machines-linux-use-ssh-key,rasquill,vm-linux,ssh_from_linux,,,_ ,
-dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-load-balance/,virtual-machines-load-balance,joaoma,vm-multiple,load_balance,_ ,_ ,_ ,N/A
-dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-planned-maintenance/,virtual-machines-planned-maintenance,drewm,vm-multiple,planned_maintenance,_ ,_ ,_ ,N/A
-dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-python-django-web-app-linux/,virtual-machines-python-django-web-app-linux,huvalo,vm-linux,python_django_web_app_linux,,,_ ,
-dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-python-django-web-app-windows-server/,virtual-machines-python-django-web-app-windows-server,huvalo,vm-windows,python_django_web_app_windows,,_ ,,
+dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-load-balance/,virtual-machines-load-balance,joaoma,vm-multiple,load_balance,_ ,_ ,_ ,Linux
+dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-planned-maintenance/,virtual-machines-planned-maintenance,drewm,vm-multiple,planned_maintenance,_ ,_ ,_ ,Linux
+dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-python-django-web-app-linux/,virtual-machines-python-django-web-app-linux,huvalo,vm-linux,python_django_web_app,,,_ ,
+dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-python-django-web-app-windows-server/,virtual-machines-python-django-web-app-windows-server,huvalo,vm-windows,python_django_web_app,,_ ,,
 dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-rdp-detailed-troubleshoot/,virtual-machines-rdp-detailed-troubleshoot,dkshir,vm-windows,detailed_troubleshoot_rdp,,_ ,,
 dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-sap-on-linux-suse-quickstart/,virtual-machines-sap-on-linux-suse-quickstart,hermannd,vm-linux,sap_on_suse_quickstart,,,_ ,
-dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-spark-template/,virtual-machines-spark-template,paolosalvatori,vm-linux,arm_spark_template,,,_ ,
-dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-sql-server-agent-extension/,virtual-machines-sql-server-agent-extension,jeffreyg,vm-windows-sql-server,sql_server_agent_extension,,_ ,,
+dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-sql-server-agent-extension/,virtual-machines-sql-server-agent-extension,jeffreyg,vm-windows-sql-server,asm_sql_server_agent_extension,,_ ,,
 dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-tagging-arm/,virtual-machines-tagging-arm,dkshir;memccror,vm-multiple,arm_tag_vm,_ ,_ ,_ ,Linux
-dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-troubleshoot-access-application/,virtual-machines-troubleshoot-access-application,dkshir,na,troubleshoot_app_connection,_ ,_ ,_ ,N/A
+dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-troubleshoot-access-application/,virtual-machines-troubleshoot-access-application,dkshir,na,troubleshoot_app_connection,_ ,_ ,_ ,Linux
 dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-troubleshoot-remote-desktop-connections/,virtual-machines-troubleshoot-remote-desktop-connections,dkshir,vm-windows,troubleshoot_rdp_connection,,_ ,,
 dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-troubleshoot-ssh-connections/,virtual-machines-troubleshoot-ssh-connections,dkshir,vm-linux,troubleshoot_ssh_connection,,,_ ,
 dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-vms-containers/,virtual-machines-vms-containers,rasquill,infrastructure,vms_and_containers,_ ,_ ,_ ,Linux
@@ -210,3 +204,6 @@ dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines
 dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-vmss-vstemplates/,virtual-machines-vmss-vstemplates,guybo,na,arm_scale_sets_visual_studio,_ ,_ ,_ ,Linux
 dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-reset-password/,virtual-machines-windows-reset-password,dkshir,vm-windows,arm_reset_rdp,,_ ,,
 dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-use-ssh-key/,virtual-machines-windows-use-ssh-key,rasquill,vm-linux,ssh_from_windows,,,_ ,
+cynthn,https://azure.microsoft.com/en-us/documentation/articles/arm_log_on_windows_vm/,virtual-machines-arm-log-on-windows-vm,cynthn,vm-windows-sql-server,arm_log_on,,_ ,,
+dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-capture-image-resource-manager/,virtual-machines-windows-capture-image-resource-manager,dkshir ,vm-windows,arm_capture_image,,_ ,,
+dkshir,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-upload-image-windows-resource-manager,virtual-machines-upload-image-windows-resource-manager,dkshir,vm-windows,arm_upload_image,,_ ,,
