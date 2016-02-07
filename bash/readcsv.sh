@@ -1,11 +1,5 @@
 #!/bin/bash
-# set -x
-# establish the root of the git directory
-GITROOT=$(git rev-parse --show-toplevel)
 
-# logging configuration
-LOG=/var/log/readcsv.log
-sudo chown -R rasquill /var/log/
 
 timestamp() {
   date +"%T"
@@ -40,7 +34,6 @@ function get_Title(){
 
 # Determines whether something is BOTH
 function asm_arm_or_both(){
-    infix=""
     if [[ "$1" =~ .*azure-resource-manager.* && "$1" =~ .*azure-resource-manager.* ]]; then
         echo "-"
     else
@@ -89,9 +82,53 @@ function norm_hypens(){
 ## 6. take the stem and write: "virtual-machines"-windows|linux-arm|asm-remaining slug
 nonVirtualMachinesCount=0
 function build_new_name(){
+#    set -x
     local new_name=""
+    local current_name="$NewNameSlug"
+    #echo "Current name is : $current_name"
+    current_name=${current_name//_/-}
+    
+    # remove virtual-machine[s] and clean hyphens
+    new_name=${current_name//virtual-machines/}
+    new_name=${new_name//virtual-machine/}
+    new_name=${new_name//-vms-/}
+    new_name=${new_name//-vm-/}
+    new_name=${new_name#vms-}
+    new_name=${new_name#vm-}
+    new_name=${new_name%-vms}
+    new_name=${new_name%-vm}
+    new_name=${new_name%-}
+    new_name=${new_name#-}
+    
+    # remove linux and clean hyphens
+    new_name=${new_name//linux/}
+    new_name=${new_name%-}
+    new_name=${new_name#-}
+    
+    # remove windows and clean hyphens
+    new_name=${new_name//windows-server/}
+    new_name=${new_name//windows/}
+    new_name=${new_name%-}
+    new_name=${new_name#-}
 
-    echo "vms-linux-$(asm_arm_or_both $1)$(norm_hypens $2).md" | sed s/--/-/g
+    # remove asm and clean hyphens
+    new_name=${new_name//-asm-/}
+    new_name=${new_name%-asm}
+    new_name=${new_name#asm-}
+    
+    # remove arm and clean hyphens
+    new_name=${new_name//-arm-/}
+    new_name=${new_name%-arm}
+    new_name=${new_name#-}
+    new_name=${new_name%-}
+    
+    new_name=${new_name//--/-}
+    
+    #echo "New name stem is : $new_name"
+    
+    #pause "...."
+    local final_name="virtual-machines-$1-$(asm_arm_or_both $tags)$new_name.md" 
+    echo ${final_name//--/-}
 }
 
 function no_tags()
@@ -113,6 +150,21 @@ function no_tags()
             echo "$(timestamp): RedirectTarget: $RedirectTarget" >> $1
 }
 
+
+
+
+#========================================================================================================
+#========================================================================================================
+#========================================================================================================
+
+# set -x
+# establish the root of the git directory
+GITROOT=$(git rev-parse --show-toplevel)
+
+# logging configuration
+LOG=/var/log/readcsv.log
+OUTPUT=/var/log/output.log
+sudo chown -R rasquill /var/log/
 echo "Log file is: $LOG."
 echo "Starting run: $(date)." >> $LOG
 
@@ -138,14 +190,16 @@ do
 #    windows_linux_both
 
     get_tags $contentID.md tags
-    echo "$tags" 
-    pause "those were the tags we found...."
+
     if [[ "$Include" =~ .*_.* ]]; then
         echo "It's an include file....so here we pass the variable to the include script using \"source\""
+        new_topic_name=$(build_new_name "common")
     elif [[ "$Windows" =~ .*_.* ]]; then
         echo "It's a windows target, so move into the rename windows process..."
+        new_topic_name=$(build_new_name "windows")
     elif [[ "$Linux" =~ .*_.* ]]; then
         echo "It's a linux target, so move into the rename linux process..."
+        new_topic_name=$(build_new_name "linux")
     else
         echo "$(timestamp): Can't detect what OS is the intended target for line $COUNT: $contentID
     fi
@@ -158,10 +212,11 @@ do
         fi
         # log the fact that we can't do anything with this file and move on
         #no_tags $LOG $Assigned $URL $contentID.md $Author MSTgtPltfrm $(norm_hypens $NewNameSlug) $Include $Windows $Linux $RedirectTarget
-        pause "Press ENTER to continue..."
+        #pause "Press ENTER to continue..."
         continue
     fi
 
+#    write_filename_logs $new_topic_name
 
      #set -x
     echo "Assigned: $Assigned"
@@ -171,20 +226,19 @@ do
     echo "Author: $Author"
     echo "Tags: $tags"
     echo "MSTgtPltfrm: $MSTgtPltfrm"
-    echo "NewNameSlug: $(norm_hypens $NewNameSlug)"
+    echo "NewNameSlug: $NewNameSlug"
     echo "Include: $Include"
     echo "Windows: $Windows"
     echo "Linux: $Linux"
     echo "RedirectTarget: $RedirectTarget"
-    echo "newname: $(build_new_name $tags $NewNameSlug)"
+    echo "New topic name: $new_topic_name"
 
     echo ""
 
-    #pause "Press ENTER to continue..."
+    pause "Press ENTER to continue..."
 
-    #source ~/workspace/gitwork/bash/renamefile.sh $contentID.md $(build_new_name $tags $NewNameSlug)
+    #source ~/workspace/gitwork/bash/renamefile.sh $contentID.md $new_topic_name
     #find $(git rev-parse --show-toplevel) -name "*.md-e" -type f -exec rm {} +
 
-    echo "Final non virtual machines count: $nonVirtualMachinesCount"
 done < $1
 
