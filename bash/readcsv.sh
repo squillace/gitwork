@@ -190,6 +190,27 @@ do
 #    windows_linux_both
 
     get_tags $contentID.md tags
+    
+    if [[ "$Author" != "cynthn" ]]; then
+        continue
+    fi
+    
+    # Log the toc stuff
+#    This is the format of the lines for the .resx:
+ 
+#    <data name="Link_file_name" xml:space="preserve">
+#        <value>My title for left-nav</value>
+#    </data>
+    
+#    This is the format for the lines for the .json:
+    
+#    "Link_file_name": "article:file-name",
+    
+
+# create the redirect string
+
+#docURLFragment="/documentation/articles"
+#echo "<add key=\"$docURLFragment/$FILESTEM/\" value=\"$docURLFragment/$NEWFILESTEM/\" /> <!-- $(date +%D) -->" >> $RedirectLOG
 
     if [[ "$Include" =~ .*_.* ]]; then
         echo "It's an include file....so here we pass the variable to the include script using \"source\""
@@ -197,11 +218,15 @@ do
     elif [[ "$Windows" =~ .*_.* ]]; then
         echo "It's a windows target, so move into the rename windows process..."
         new_topic_name=$(build_new_name "windows")
+        source ~/workspace/gitwork/bash/renamefile.sh $contentID.md $new_topic_name
+
     elif [[ "$Linux" =~ .*_.* ]]; then
         echo "It's a linux target, so move into the rename linux process..."
         new_topic_name=$(build_new_name "linux")
+        source ~/workspace/gitwork/bash/renamefile.sh $contentID.md $new_topic_name
     else
-        echo "$(timestamp): Can't detect what OS is the intended target for line $COUNT: $contentID
+        echo "$(timestamp): Can't detect what OS is the intended target for line $COUNT: $contentID" >> $LOG
+        no_tags $LOG $Assigned $URL $contentID.md $Author MSTgtPltfrm $(norm_hypens $NewNameSlug) $Include $Windows $Linux $RedirectTarget
     fi
 
     if [[ ! "$tags" =~ .*azure-resource-manager.* && ! "$tags" =~ .*azure-service-management.* ]]; then
