@@ -30,7 +30,7 @@ cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-use-root-privileges/,virtual-machines-linux-use-root-privileges,szark,vm-linux,use_root_privileges,,,_ ,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-use-vmaccess-reset-password-or-ssh/,virtual-machines-linux-use-vmaccess-reset-password-or-ssh,cynthn,vm-linux,asm_reset_access_vmaccess,,,_ ,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-log-on-windows-server/,virtual-machines-log-on-windows-server,cynthn,vm-windows,asm_connect_logon,,_ ,,
-cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-log-on-windows-server-preview/,virtual-machines-log-on-windows-server-preview,cynthn,vm-windows,arm_connect_logonæ,,_ ,,
+cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-log-on-windows-server-preview/,virtual-machines-log-on-windows-server-preview,cynthn,vm-windows,arm_connect_logonÊ,,_ ,,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-mariadb-cluster/,virtual-machines-mariadb-cluster,v-ahsab,vm-linux,asm_mariadb_mysql_cluster,,,_ ,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-migrate-onpremises-database/,virtual-machines-migrate-onpremises-database,carlrab,vm-windows-sql-server,asm_migrate_sql,,_ ,,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-miscellaneous-considerations-oracle-virtual-machine-images/,virtual-machines-miscellaneous-considerations-oracle-virtual-machine-images,bbenz,vm-windows,asm_oracle_considerations,,_ ,,
@@ -41,7 +41,7 @@ cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-ps-create-preconfigure-linux-vms/,virtual-machines-ps-create-preconfigure-linux-vms,cynthn,vm-linux,asm_create_vm_powershell,,,_ ,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-ps-create-preconfigure-windows-resource-manager-vms/,virtual-machines-ps-create-preconfigure-windows-resource-manager-vms,cynthn,na,arm_create_powershell,,_ ,,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-ps-create-preconfigure-windows-vms/,virtual-machines-ps-create-preconfigure-windows-vms,cynthn,vm-windows,asm_create_powershell,,_ ,,
-cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-python-ipython-notebook/,virtual-machines-python-ipython-notebook,crwilcox,vm-linux,arm_jupyter_notebookæ,,,_ ,
+cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-python-ipython-notebook/,virtual-machines-python-ipython-notebook,crwilcox,vm-linux,arm_jupyter_notebookÊ,,,_ ,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-questions/,virtual-machines-questions,cynthn,vm-multiple,asm_faq,_ ,_ ,_ ,Linux
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-redis-template/,virtual-machines-redis-template,twieman,vm-windows,arm_redis_template,,_ ,,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-set-up-endpoints/,virtual-machines-set-up-endpoints,cynthn,vm-multiple,asm_setup_endpoints,_ ,_ ,_ ,Windows
