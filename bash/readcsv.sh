@@ -191,10 +191,7 @@ do
 
     get_tags $contentID.md tags
     
-    if [[ "$Author" != "cynthn" ]]; then
-        continue
-    fi
-    
+   
     # Log the toc stuff
 #    This is the format of the lines for the .resx:
  
@@ -212,6 +209,25 @@ do
 #docURLFragment="/documentation/articles"
 #echo "<add key=\"$docURLFragment/$FILESTEM/\" value=\"$docURLFragment/$NEWFILESTEM/\" /> <!-- $(date +%D) -->" >> $RedirectLOG
 
+    if [[ ! "$Assigned" == "davidmu" ]]; then 
+        echo "It's not David"
+        continue
+    fi
+    
+    if [[ ! "$tags" =~ .*azure-resource-manager.* && ! "$tags" =~ .*azure-service-management.* ]]; then
+
+        echo "hey, we don't have either tag here!!!!!!!!!!!!!!!"
+        if [[ "$NewNameSlug" =~ .*asm.* ]]; then
+            echo "BUT is does have asm in $NewNameSlug... i"
+        fi
+        # log the fact that we can't do anything with this file and move on
+        no_tags $LOG $Assigned $URL $contentID.md $Author MSTgtPltfrm $(norm_hypens $NewNameSlug) $Include $Windows $Linux $RedirectTarget
+        #pause "Press ENTER to continue..."
+        #continue
+    fi
+    
+
+    
     if [[ "$Include" =~ .*_.* ]]; then
         echo "It's an include file....so here we pass the variable to the include script using \"source\""
         new_topic_name=$(build_new_name "common")
@@ -226,20 +242,11 @@ do
         source ~/workspace/gitwork/bash/renamefile.sh $contentID.md $new_topic_name
     else
         echo "$(timestamp): Can't detect what OS is the intended target for line $COUNT: $contentID" >> $LOG
-        no_tags $LOG $Assigned $URL $contentID.md $Author MSTgtPltfrm $(norm_hypens $NewNameSlug) $Include $Windows $Linux $RedirectTarget
-    fi
-
-    if [[ ! "$tags" =~ .*azure-resource-manager.* && ! "$tags" =~ .*azure-service-management.* ]]; then
-
-        echo "hey, we don't have either tag here!!!!!!!!!!!!!!!"
-        if [[ "$NewNameSlug" =~ .*asm.* ]]; then
-            echo "BUT is does have asm in $NewNameSlug... i"
-        fi
-        # log the fact that we can't do anything with this file and move on
         #no_tags $LOG $Assigned $URL $contentID.md $Author MSTgtPltfrm $(norm_hypens $NewNameSlug) $Include $Windows $Linux $RedirectTarget
-        #pause "Press ENTER to continue..."
-        continue
     fi
+    
+    # for testing, only run through errors.
+#    continue
 
 #    write_filename_logs $new_topic_name
 
