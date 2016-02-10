@@ -140,6 +140,86 @@ function build_new_name(){
     echo ${final_name//--/-}
 }
 
+## remove after testing
+function write_new_name(){
+#    set -x
+    local new_name=""
+    local current_name="$NewNameSlug"
+    #echo "Current name is : $current_name"
+    current_name=${current_name//_/-}
+    
+    # remove virtual-machine[s] and clean hyphens
+    new_name=${current_name//virtual-machines/}
+    new_name=${new_name//virtual-machine/}
+    new_name=${new_name//-vms-/}
+    new_name=${new_name//-vm-/}
+    new_name=${new_name#vms-}
+    new_name=${new_name#vm-}
+    #new_name=${new_name%-vms}
+    new_name=${new_name%-vm}
+    new_name=${new_name%-}
+    new_name=${new_name#-}
+    
+    # remove linux and clean hyphens
+    new_name=${new_name//linux/}
+    new_name=${new_name%-}
+    new_name=${new_name#-}
+    
+    # remove windows and clean hyphens
+    new_name=${new_name//windows-server/}
+    new_name=${new_name//windows/}
+    new_name=${new_name%-}
+    new_name=${new_name#-}
+
+    # remove asm and clean hyphens
+    new_name=${new_name//-asm-/}
+    new_name=${new_name%-asm}
+    new_name=${new_name#asm-}
+    
+    # remove arm and clean hyphens
+    # must not remove swarm or farm or armcompare
+    new_name=${new_name//-arm-/}
+    new_name=${new_name%-arm}
+    new_name=${new_name#arm-}
+    new_name=${new_name%-}
+    
+    new_name=${new_name//--/-}
+    
+    ASM=""
+
+    
+    if [[ "$Include" =~ .*_.* ]]; then
+        new_name="common-$new_name"
+            if [[ "$NewNameSlug" =~ .*asm.* && ! "$NewNameSlug" =~ .*arm.* && ! "$NewNameSlug" =~ .*farm.* && ! "$NewNameSlug" =~ .*swarm.* ]]; then
+            new_name="$new_name-classic"
+            fi
+    elif [[ "$Windows" =~ .*_.* ]]; then
+        new_name="windows-$new_name"
+            if [[ "$NewNameSlug" =~ .*asm.* && ! "$NewNameSlug" =~ .*arm.* && ! "$NewNameSlug" =~ .*farm.* && ! "$NewNameSlug" =~ .*swarm.* ]]; then
+            new_name="$new_name-classic"
+            fi
+        if [[ "$NewNameSlug" =~ .*from_linux.* ]]; then
+            new_name=${new_name//from/from-windows}
+        fi
+    elif [[ "$Linux" =~ .*_.* ]]; then
+        new_name="linux-$new_name"
+            if [[ "$NewNameSlug" =~ .*asm.* && ! "$NewNameSlug" =~ .*arm.* && ! "$NewNameSlug" =~ .*farm.* && ! "$NewNameSlug" =~ .*swarm.* ]]; then
+            new_name="$new_name-classic"
+            fi
+    if [[ "$NewNameSlug" =~ .*from_linux.* ]]; then
+            new_name=${new_name//from/from-linux}
+        fi
+    else
+        echo "$(timestamp): Can't detect what OS is the intended target for line $COUNT: $contentID" >> $LOG
+        #no_tags $LOG $Assigned $URL $contentID.md $Author MSTgtPltfrm $(norm_hypens $NewNameSlug) $Include $Windows $Linux $RedirectTarget
+    fi
+    
+    
+    #pause "...."
+    local final_name="virtual-machines-$1-$new_name.md" 
+    echo ${final_name//--/-}
+}
+
 function no_tags()
 {
             echo ""
@@ -174,7 +254,7 @@ GITROOT=$(git rev-parse --show-toplevel)
 LOG=/var/log/readcsv.log
 OUTPUT=/var/log/output.log
 sudo chown -R rasquill /var/log/
-echo "Log file is: $LOG."
+#echo "Log file is: $LOG."
 echo "Starting run: $(date)." >> $LOG
 
 let COUNT=0
@@ -184,10 +264,10 @@ while IFS=, read Assigned URL contentID Author MSTgtPltfrm NewNameSlug Include W
 do
 
     ((COUNT++))
-    echo "Reading line: $COUNT"
+    #echo "Reading line: $COUNT"
     # skip the header in the CSV file
     if [ "$COUNT" -eq 1 ]; then
-        echo "$timestamp: Header line read."
+       # echo "$timestamp: Header line read."
         continue
     fi
 
@@ -199,10 +279,12 @@ do
     
 # debugging section
 
-    if [[ ! "$Assigned" == "davidmu" ]]; then 
-        echo "It's not David"
-        continue
-    fi
+    write_new_name 
+    continue
+#    if [[ ! "$Assigned" == "davidmu" ]]; then 
+#        echo "It's not David"
+#        continue
+#    fi
 
 #    if [[ "$contentID" == "virtual-machines-workload-high-availability-lob-application-overview" || "$contentID" == "virtual-machines-workload-high-availability-LOB-application-phase1" ]]; then
 #        echo "Here we are..."
