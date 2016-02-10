@@ -163,7 +163,7 @@ function no_tags()
 
 
 #========================================================================================================
-#========================================================================================================
+#=================== Main portion of the program +++++===================================================
 #========================================================================================================
 
 # set -x
@@ -204,11 +204,11 @@ do
         continue
     fi
 
-    if [[ "$contentID" == "virtual-machines-workload-high-availability-lob-application-overview" || "$contentID" == "virtual-machines-workload-high-availability-LOB-application-phase1" ]]; then
-        echo "Here we are..."
-    else    
-        continue
-    fi
+#    if [[ "$contentID" == "virtual-machines-workload-high-availability-lob-application-overview" || "$contentID" == "virtual-machines-workload-high-availability-LOB-application-phase1" ]]; then
+#        echo "Here we are..."
+#    else    
+#        continue
+#    fi
 # end debugging section
 
 #    windows_linux_both
