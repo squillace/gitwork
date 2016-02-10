@@ -94,6 +94,7 @@ function build_new_name(){
     local new_name=""
     local current_name="$NewNameSlug"
     #echo "Current name is : $current_name"
+    # replace underscores with hyphens
     current_name=${current_name//_/-}
     
     # remove virtual-machine[s] and clean hyphens
@@ -184,36 +185,36 @@ function write_new_name(){
     new_name=${new_name%-}
     
     new_name=${new_name//--/-}
-    
-    ASM=""
-
+    new_name=${new_name// /}
     
     if [[ "$Include" =~ .*_.* ]]; then
+        if [[ "$NewNameSlug" =~ .*asm.* && ! "$NewNameSlug" =~ .*arm.* && ! "$NewNameSlug" =~ .*farm.* && ! "$NewNameSlug" =~ .*swarm.* ]]; then
+            new_name=${new_name//$new_name/classic-$new_name}
+        fi
         new_name="common-$new_name"
-            if [[ "$NewNameSlug" =~ .*asm.* && ! "$NewNameSlug" =~ .*arm.* && ! "$NewNameSlug" =~ .*farm.* && ! "$NewNameSlug" =~ .*swarm.* ]]; then
-            new_name="$new_name-classic"
-            fi
     elif [[ "$Windows" =~ .*_.* ]]; then
+        if [[ "$NewNameSlug" =~ .*asm.* && ! "$NewNameSlug" =~ .*arm.* && ! "$NewNameSlug" =~ .*farm.* && ! "$NewNameSlug" =~ .*swarm.* ]]; then
+        new_name=${new_name//$new_name/classic-$new_name}
+        fi
         new_name="windows-$new_name"
-            if [[ "$NewNameSlug" =~ .*asm.* && ! "$NewNameSlug" =~ .*arm.* && ! "$NewNameSlug" =~ .*farm.* && ! "$NewNameSlug" =~ .*swarm.* ]]; then
-            new_name="$new_name-classic"
-            fi
+    elif [[ "$Linux" =~ .*_.* ]]; then
+        if [[ "$NewNameSlug" =~ .*asm.* && ! "$NewNameSlug" =~ .*arm.* && ! "$NewNameSlug" =~ .*farm.* && ! "$NewNameSlug" =~ .*swarm.* ]]; then
+            new_name=${new_name//$new_name/classic-$new_name}
+        fi
+        new_name="linux-$new_name"
+        # special casing this one file
         if [[ "$NewNameSlug" =~ .*from_linux.* ]]; then
+            new_name=${new_name//from/from-linux}
+        fi 	
+        # special casing this one file
+        if [[ "$NewNameSlug" =~ .*from_windows.* ]]; then
             new_name=${new_name//from/from-windows}
         fi
-    elif [[ "$Linux" =~ .*_.* ]]; then
-        new_name="linux-$new_name"
-            if [[ "$NewNameSlug" =~ .*asm.* && ! "$NewNameSlug" =~ .*arm.* && ! "$NewNameSlug" =~ .*farm.* && ! "$NewNameSlug" =~ .*swarm.* ]]; then
-            new_name="$new_name-classic"
-            fi
-    if [[ "$NewNameSlug" =~ .*from_linux.* ]]; then
-            new_name=${new_name//from/from-linux}
-        fi
-    else
-        echo "$(timestamp): Can't detect what OS is the intended target for line $COUNT: $contentID" >> $LOG
-        #no_tags $LOG $Assigned $URL $contentID.md $Author MSTgtPltfrm $(norm_hypens $NewNameSlug) $Include $Windows $Linux $RedirectTarget
-    fi
-    
+     else       
+            echo "$(timestamp): Can't detect what OS is the intended target for line $COUNT: $contentID" >> $LOG
+            #no_tags $LOG $Assigned $URL $contentID.md $Author MSTgtPltfrm $(norm_hypens $NewNameSlug) $Include $Windows $Linux $RedirectTarget
+     fi        
+        
     
     #pause "...."
     local final_name="virtual-machines-$1-$new_name.md" 
