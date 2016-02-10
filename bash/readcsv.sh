@@ -29,7 +29,15 @@ function get_Title(){
 #    echo "gitroot is $GITROOT"
 #    echo "getting complete path is $(find "$GITROOT" -name "$1" -type f)"
 
-    echo "\"$(grep -Pohr -m 1 "(?<=^#).*" $FILEPATH | sed "s/^ *//g" | sed "s/<.*>//g")\""
+    # for the record: grep -Pohr -m 1 "(?<=^#)[ ].*\w*" $FILEPATH 
+    # grab the first instance of a line that starts with '#' and any spaces that follow.
+    # grab the strings in that line
+    # remove any leading spaces: sed "s/^ *//g"
+    # remove any HTML elements in the title string: sed "s/<.*>//g"
+    # remove CR : tr -d '\015'
+    # remove LF
+    # remove any trailing #
+    eval "$2='$(grep -Pohr -m 1 "(?<=^#)[ ].*\w*" $FILEPATH | sed "s/^ *//g" | sed "s/<.*>//g" | tr -d '\015' | tr -d '\012'| tr -d '#')'"
 }
 
 # Determines whether something is BOTH
@@ -80,7 +88,7 @@ function norm_hypens(){
 ## 4. remove any -windows- set "windows" flag
 ## 5. remove any -linux- and set "linux" flag
 ## 6. take the stem and write: "virtual-machines"-windows|linux-arm|asm-remaining slug
-nonVirtualMachinesCount=0
+
 function build_new_name(){
 #    set -x
     local new_name=""
@@ -117,6 +125,7 @@ function build_new_name(){
     new_name=${new_name#asm-}
     
     # remove arm and clean hyphens
+    # must not remove swarm or farm
     new_name=${new_name//-arm-/}
     new_name=${new_name%-arm}
     new_name=${new_name#-}
@@ -170,8 +179,10 @@ echo "Starting run: $(date)." >> $LOG
 
 let COUNT=0
 tags=""
+title=""
 while IFS=, read Assigned URL contentID Author MSTgtPltfrm NewNameSlug Include Windows Linux RedirectTarget
 do
+
     ((COUNT++))
     echo "Reading line: $COUNT"
     # skip the header in the CSV file
@@ -185,12 +196,25 @@ do
         echo "$(timestamp): The File '$(find "$GITROOT" -name "$contentID.md" -type f)' Does Not Exist" >> $LOG
         continue 
     fi
+    
+# debugging section
 
+    if [[ ! "$Assigned" == "davidmu" ]]; then 
+        echo "It's not David"
+        continue
+    fi
+
+    if [[ "$contentID" == "virtual-machines-workload-high-availability-lob-application-overview" || "$contentID" == "virtual-machines-workload-high-availability-LOB-application-phase1" ]]; then
+        echo "Here we are..."
+    else    
+        continue
+    fi
+# end debugging section
 
 #    windows_linux_both
 
     get_tags $contentID.md tags
-    
+    get_Title $contentID.md title
    
     # Log the toc stuff
 #    This is the format of the lines for the .resx:
@@ -209,10 +233,7 @@ do
 #docURLFragment="/documentation/articles"
 #echo "<add key=\"$docURLFragment/$FILESTEM/\" value=\"$docURLFragment/$NEWFILESTEM/\" /> <!-- $(date +%D) -->" >> $RedirectLOG
 
-    if [[ ! "$Assigned" == "davidmu" ]]; then 
-        echo "It's not David"
-        continue
-    fi
+
     
     if [[ ! "$tags" =~ .*azure-resource-manager.* && ! "$tags" =~ .*azure-service-management.* ]]; then
 
@@ -225,8 +246,6 @@ do
         #pause "Press ENTER to continue..."
         #continue
     fi
-    
-
     
     if [[ "$Include" =~ .*_.* ]]; then
         echo "It's an include file....so here we pass the variable to the include script using \"source\""
@@ -252,7 +271,7 @@ do
 
      #set -x
     echo "Assigned: $Assigned"
-    echo "Title: $(get_Title $contentID.md)"
+    echo "Title for $contentID.md: $title"
     echo "URL: $URL"
     echo "contentID: $contentID"
     echo "Author: $Author"
