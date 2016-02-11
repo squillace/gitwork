@@ -31,7 +31,9 @@ else
    continue
 fi
 
-RedirectLOG=~/redirects.txt
+# Algorithm is as follows:
+
+
 
 FILESTEM=${FILE%.md}
 NEWFILESTEM=${NEWFILE%.md}
