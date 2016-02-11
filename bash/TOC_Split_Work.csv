@@ -28,7 +28,7 @@ cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-nodejs-running-cassandra/,virtual-machines-linux-nodejs-running-cassandra,robmcm,vm-linux,asm_cassandra_nodejs,,,__,,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-usernames/,virtual-machines-linux-usernames,szark,vm-linux,linux_usernames,,,__,,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-use-root-privileges/,virtual-machines-linux-use-root-privileges,szark,vm-linux,use_root_privileges,,,__,,
-cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-use-vmaccess-reset-password-or-ssh/,virtual-machines-linux-use-vmaccess-reset-password-or-ssh,cynthn,vm-linux,asm_reset_access_vmaccess,,,__,,
+cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-use-vmaccess-reset-password-or-ssh/,virtual-machines-linux-use-vmaccess-reset-password-or-ssh,cynthn,vm-linux,asm_reset_access,,,__,,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-log-on-windows-server/,virtual-machines-log-on-windows-server,cynthn,vm-windows,asm_connect_logon,,__,,,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-log-on-windows-server-preview/,virtual-machines-log-on-windows-server-preview,cynthn,vm-windows,arm_connect_logon,,__,,,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-mariadb-cluster/,virtual-machines-mariadb-cluster,v-ahsab,vm-linux,asm_mariadb_mysql_cluster,,,__,,
