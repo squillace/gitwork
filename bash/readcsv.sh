@@ -143,10 +143,11 @@ function build_new_name(){
 
 ## remove after testing
 function write_new_name(){
-#    set -x
+    #echo $1
     local new_name=""
     local current_name="$NewNameSlug"
-    #echo "Current name is : $current_name"
+    #echo "Current name is : \"$current_name\""
+    #echo "Name slug is: \"$NewNameSlug\""
     current_name=${current_name//_/-}
     
     # remove virtual-machine[s] and clean hyphens
@@ -187,37 +188,52 @@ function write_new_name(){
     new_name=${new_name//--/-}
     new_name=${new_name// /}
     
-    if [[ "$Include" =~ .*_.* ]]; then
-        if [[ "$NewNameSlug" =~ .*asm.* && ! "$NewNameSlug" =~ .*arm.* && ! "$NewNameSlug" =~ .*farm.* && ! "$NewNameSlug" =~ .*swarm.* ]]; then
-            new_name=${new_name//$new_name/classic-$new_name}
-        fi
-        new_name="common-$new_name"
-    elif [[ "$Windows" =~ .*_.* ]]; then
-        if [[ "$NewNameSlug" =~ .*asm.* && ! "$NewNameSlug" =~ .*arm.* && ! "$NewNameSlug" =~ .*farm.* && ! "$NewNameSlug" =~ .*swarm.* ]]; then
+    #echo "after modifications the Current name is : $new_name"
+
+    
+    ## add the deployment information
+    
+    if [[ "$NewNameSlug" =~ .*asm.* && ! "$NewNameSlug" =~ .*arm.* && ! "$NewNameSlug" =~ .*farm.* && ! "$NewNameSlug" =~ .*swarm.* ]]; then
         new_name=${new_name//$new_name/classic-$new_name}
-        fi
-        new_name="windows-$new_name"
-    elif [[ "$Linux" =~ .*_.* ]]; then
-        if [[ "$NewNameSlug" =~ .*asm.* && ! "$NewNameSlug" =~ .*arm.* && ! "$NewNameSlug" =~ .*farm.* && ! "$NewNameSlug" =~ .*swarm.* ]]; then
-            new_name=${new_name//$new_name/classic-$new_name}
-        fi
-        new_name="linux-$new_name"
-        # special casing this one file
-        if [[ "$NewNameSlug" =~ .*from_linux.* ]]; then
-            new_name=${new_name//from/from-linux}
-        fi 	
-        # special casing this one file
-        if [[ "$NewNameSlug" =~ .*from_windows.* ]]; then
-            new_name=${new_name//from/from-windows}
-        fi
+    elif [[ "$NewNameSlug" =~ .*asm.* && ! "$NewNameSlug" =~ .*arm.* && ! "$NewNameSlug" =~ .*farm.* && ! "$NewNameSlug" =~ .*swarm.* ]]; then
+        new_name=${new_name//$new_name/classic-$new_name}
+    elif [[ "$NewNameSlug" =~ .*asm.* && ! "$NewNameSlug" =~ .*arm.* && ! "$NewNameSlug" =~ .*farm.* && ! "$NewNameSlug" =~ .*swarm.* ]]; then
+        new_name=${new_name//$new_name/classic-$new_name}
      else       
-            echo "$(timestamp): Can't detect what OS is the intended target for line $COUNT: $contentID" >> $LOG
+            echo "$(timestamp): Can't detect what deployment is the intended target for line $COUNT: $contentID" >> $LOG
             #no_tags $LOG $Assigned $URL $contentID.md $Author MSTgtPltfrm $(norm_hypens $NewNameSlug) $Include $Windows $Linux $RedirectTarget
      fi        
-        
+            
+    ## add the os information
+      
+    if [[ "$Include" =~ .*_.* ]]; then
+        #echo "It's an include file....so here we pass the variable to the include script using \"source\""
+        new_name=${new_name//$new_name/common-$new_name}
+    elif [[ "$Windows" =~ .*_.* ]]; then
+        #echo "It's a windows target, so move into the rename windows process..."
+        new_name=${new_name//$new_name/windows-$new_name}
+        # source ~/workspace/gitwork/bash/renamefile.sh $contentID.md $new_topic_name
+
+    elif [[ "$Linux" =~ .*_.* ]]; then
+        #echo "It's a linux target, so move into the rename linux process..."
+        new_name=${new_name//$new_name/linux-$new_name}
+
+        # source ~/workspace/gitwork/bash/renamefile.sh $contentID.md $new_topic_name
+        # special casing this one file
+        if [[ "$NewNameSlug" =~ .*ssh_from_linux.* ]]; then
+            new_name=${new_name//from/from-linux}
+        elif [[ "$NewNameSlug" =~ .*ssh_from_windows.* ]]; then
+            # special casing this one file
+            new_name=${new_name//from/from-windows}
+        fi
+
+    else
+        echo "$(timestamp): Can't detect what OS is the intended target for line $COUNT: $contentID" >> $LOG
+        #no_tags $LOG $Assigned $URL $contentID.md $Author MSTgtPltfrm $(norm_hypens $NewNameSlug) $Include $Windows $Linux $RedirectTarget
+    fi    
     
-    #pause "...."
-    local final_name="virtual-machines-$1-$new_name.md" 
+    #pause "....$1"
+    local final_name="virtual-machines-$new_name.md" 
     echo ${final_name//--/-}
 }
 
@@ -253,6 +269,7 @@ GITROOT=$(git rev-parse --show-toplevel)
 
 # logging configuration
 LOG=/var/log/readcsv.log
+RedirectLOG=~/redirects.log
 OUTPUT=/var/log/output.log
 sudo chown -R rasquill /var/log/
 #echo "Log file is: $LOG."
@@ -261,14 +278,15 @@ echo "Starting run: $(date)." >> $LOG
 let COUNT=0
 tags=""
 title=""
+temp_name=""
 while IFS=, read Assigned URL contentID Author MSTgtPltfrm NewNameSlug Include Windows Linux RedirectTarget
 do
 
     ((COUNT++))
-    #echo "Reading line: $COUNT"
+    echo "Reading line: $COUNT"
     # skip the header in the CSV file
     if [ "$COUNT" -eq 1 ]; then
-       # echo "$timestamp: Header line read."
+        #echo "$timestamp: Header line read."
         continue
     fi
 
@@ -280,25 +298,30 @@ do
     
 # debugging section
 
-    write_new_name 
-    continue
-#    if [[ ! "$Assigned" == "davidmu" ]]; then 
-#        echo "It's not David"
-#        continue
-#    fi
+    if [[ ! "$Assigned" == "davidmu" ]]; then 
+        #echo "It's not David"
+        continue
+    fi
 
-#    if [[ "$contentID" == "virtual-machines-workload-high-availability-lob-application-overview" || "$contentID" == "virtual-machines-workload-high-availability-LOB-application-phase1" ]]; then
+    #echo "$contentID -- checking for ssh-from"
+#   if [[ "$NewNameSlug" =~ .*ssh_from.* ]]; then
 #        echo "Here we are..."
 #    else    
 #        continue
 #    fi
+    
 # end debugging section
 
 #    windows_linux_both
 
     get_tags $contentID.md tags
     get_Title $contentID.md title
-   
+    echo "Tags are read as: $tags"
+    # clean the title
+    title=${title% }
+    title=${title# }
+    
+    
     # Log the toc stuff
 #    This is the format of the lines for the .resx:
  
@@ -313,47 +336,29 @@ do
 
 # create the redirect string
 
-#docURLFragment="/documentation/articles"
-#echo "<add key=\"$docURLFragment/$FILESTEM/\" value=\"$docURLFragment/$NEWFILESTEM/\" /> <!-- $(date +%D) -->" >> $RedirectLOG
+docURLFragment="/documentation/articles"
+echo "<add key=\"$docURLFragment/$FILESTEM/\" value=\"$docURLFragment/$NEWFILESTEM/\" /> <!-- $(date +%D) -->" >> $RedirectLOG
 
-
-    
-    if [[ ! "$tags" =~ .*azure-resource-manager.* && ! "$tags" =~ .*azure-service-management.* ]]; then
-
-        echo "hey, we don't have either tag here!!!!!!!!!!!!!!!"
-        if [[ "$NewNameSlug" =~ .*asm.* ]]; then
-            echo "BUT is does have asm in $NewNameSlug... i"
-        fi
-        # log the fact that we can't do anything with this file and move on
-        no_tags $LOG $Assigned $URL $contentID.md $Author MSTgtPltfrm $(norm_hypens $NewNameSlug) $Include $Windows $Linux $RedirectTarget
-        #pause "Press ENTER to continue..."
-        #continue
-    fi
-    
     if [[ "$Include" =~ .*_.* ]]; then
-        echo "It's an include file....so here we pass the variable to the include script using \"source\""
-        new_topic_name=$(build_new_name "common")
+        #echo "It's an include file....so here we pass the variable to the include script using \"source\""
+        new_topic_name=$(write_new_name)
     elif [[ "$Windows" =~ .*_.* ]]; then
-        echo "It's a windows target, so move into the rename windows process..."
-        new_topic_name=$(build_new_name "windows")
+        #echo "It's a windows target, so move into the rename windows process..."
+        new_topic_name=$(write_new_name)
         source ~/workspace/gitwork/bash/renamefile.sh $contentID.md $new_topic_name
 
     elif [[ "$Linux" =~ .*_.* ]]; then
-        echo "It's a linux target, so move into the rename linux process..."
-        new_topic_name=$(build_new_name "linux")
+       #echo "It's a linux target, so move into the rename linux process..."
+        new_topic_name=$(write_new_name)
         source ~/workspace/gitwork/bash/renamefile.sh $contentID.md $new_topic_name
     else
         echo "$(timestamp): Can't detect what OS is the intended target for line $COUNT: $contentID" >> $LOG
         #no_tags $LOG $Assigned $URL $contentID.md $Author MSTgtPltfrm $(norm_hypens $NewNameSlug) $Include $Windows $Linux $RedirectTarget
     fi
-    
-    # for testing, only run through errors.
-#    continue
+ 
+ #   write_filename_logs $new_topic_name
 
-#    write_filename_logs $new_topic_name
-
-     #set -x
-    echo "Assigned: $Assigned"
+	echo "Assigned: $Assigned"
     echo "Title for $contentID.md: $title"
     echo "URL: $URL"
     echo "contentID: $contentID"
@@ -369,7 +374,7 @@ do
 
     echo ""
 
-    pause "Press ENTER to continue..."
+    #pause "Here we've done a PR..."
 
     #source ~/workspace/gitwork/bash/renamefile.sh $contentID.md $new_topic_name
     #find $(git rev-parse --show-toplevel) -name "*.md-e" -type f -exec rm {} +

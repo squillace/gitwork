@@ -1,6 +1,10 @@
 #!/bin/bash
 #set -x 
 
+timestamp() {
+  date +"%T"
+}
+
 # variables
 GITROOT=$(git rev-parse --show-toplevel)
 echo "Root of the git directory is: $GITROOT"
@@ -12,6 +16,7 @@ function pause(){
 
 if (( $# != 2 )); then
     echo "Illegal number of parameters; exiting..."
+    echo "parameters are: $@"
     exit 1;
 fi
 
@@ -41,8 +46,32 @@ if [[ $FILESTEM =~ .*[-lob-]*.* || $FILESTEM =~ .*weblogic.* ]]; then
     #pause "FILESTEM is now $FILESTEM....."
 fi
 
+check_tags_value="No worries."
+# OK, ready to work. First, set the bit for the PR to check the tags value:
+if [[ ! "$tags" =~ .*azure-resource-manager.* && ! "$tags" =~ .*azure-service-management.* ]]; then
+
+    if [[ "$NewNameSlug" =~ .*asm.* ]]; then
+        check_tags_value="Check them."
+        #pause "tags: $tags; slug: $NewNameSlug"
+    fi
+    # log the fact that we can't do anything with this file and move on
+    no_tags $LOG $Assigned $URL $contentID.md $Author MSTgtPltfrm $(norm_hypens $NewNameSlug) $Include $Windows $Linux $RedirectTarget
+    #pause "Press ENTER to continue..."
+    #continue
+fi
+
+# continue    
+
+# first, create branch for the rename:
+temp_name=$(write_new_name)
+temp_name=${temp_name%.md} 
+echo $temp_name
+git checkout -b "$Assigned-$temp_name" release-vm-refactor
+
 ## first, move the file
-echo "Moving the files in git..."
+echo "Moving \"$FILE\" to \"$NEWFILE\" in git..."
+
+#continue
 
 git mv "$FILE" "$NEWFILE"
     
@@ -64,9 +93,6 @@ if [ $(ls "$MEDIAPATH" 2>/dev/null | wc -l) -ne 0 ]; then
     # locate media files, and then rewrite all inbound links to THOSE files.  
     for files in $(ls "$MEDIAPATH"*)
     do
-    
-        # found the bug: the current file stem MUST be the same case as it really is, or git will blow chunks. Figure that out.
-
         CURRENT_MEDIAFILE=${files[@]##*/}
         CURRENT_MEDIAPATH="media/$FILESTEM/$CURRENT_MEDIAFILE"
         # SED escaping
@@ -101,6 +127,17 @@ fi
 # clean up the sed modifications
 find $(git rev-parse --show-toplevel) -name "*.md-e" -type f -exec rm {} +
 
+# Do the push and PR creation:
+
+#echo "pushing to $Assigned-$temp_name:$Assigned-$temp_name"
+#pause "Assigned: $Assigned"
+$(git push -v squillace "$Assigned-$temp_name":"$Assigned-$temp_name")
+echo "$(timestamp): $(hub pull-request -m "[$Assigned]:[$NEWFILESTEM] Tagcheck: \"$tags\"" -b squillace:vm-refactor-staging -h squillace:$Assigned-$temp_name $(git rev-parse HEAD))" >> $LOG 
+
+#hub pull-request -m "trying one more time" -b squillace:release-vm-refactor -h squillace:vm-refactor-staging $(git rev-parse HEAD)
+
+git checkout vm-refactor-staging
+#git status
 
 
 
