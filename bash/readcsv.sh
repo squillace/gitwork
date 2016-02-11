@@ -342,15 +342,16 @@ echo "<add key=\"$docURLFragment/$FILESTEM/\" value=\"$docURLFragment/$NEWFILEST
     if [[ "$Include" =~ .*_.* ]]; then
         #echo "It's an include file....so here we pass the variable to the include script using \"source\""
         new_topic_name=$(write_new_name)
+        source ~/workspace/gitwork/bash/renamecommonfile.sh $contentID.md $new_topic_name
     elif [[ "$Windows" =~ .*_.* ]]; then
         #echo "It's a windows target, so move into the rename windows process..."
         new_topic_name=$(write_new_name)
-        source ~/workspace/gitwork/bash/renamefile.sh $contentID.md $new_topic_name
+        #source ~/workspace/gitwork/bash/renamefile.sh $contentID.md $new_topic_name
 
     elif [[ "$Linux" =~ .*_.* ]]; then
        #echo "It's a linux target, so move into the rename linux process..."
         new_topic_name=$(write_new_name)
-        source ~/workspace/gitwork/bash/renamefile.sh $contentID.md $new_topic_name
+        #source ~/workspace/gitwork/bash/renamefile.sh $contentID.md $new_topic_name
     else
         echo "$(timestamp): Can't detect what OS is the intended target for line $COUNT: $contentID" >> $LOG
         #no_tags $LOG $Assigned $URL $contentID.md $Author MSTgtPltfrm $(norm_hypens $NewNameSlug) $Include $Windows $Linux $RedirectTarget
