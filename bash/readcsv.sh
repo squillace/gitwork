@@ -19,7 +19,7 @@ function get_tags() {
     #echo "getting complete path is "
     #find "$GITROOT" -name "$1" -type f
     #echo $(grep -Pohr "(?<=tags=\").*" $FILEPATH | sed s/\".*//g)
-    eval "$2='$(grep -Pohr "(?<=tags=\").*(?=\"/>)" $FILEPATH )'"
+    eval "$2='$(grep -Pohr "(?<=tags=\").*(?=\"/>)" $1)'"
 }
 
 # Extracts the topic title directly from the files
@@ -37,44 +37,16 @@ function get_Title(){
     # remove CR : tr -d '\015'
     # remove LF
     # remove any trailing #
-    eval "$2='$(grep -Pohr -m 1 "(?<=^#)[ ].*\w*" $FILEPATH | sed "s/^ *//g" | sed "s/<.*>//g" | tr -d '\015' | tr -d '\012'| tr -d '#')'"
+#    local temp="$(grep -Pohr -m 1 "(?<=^#)[ ].*\w*" $1)"
+#    pause "$temp"
+#    eval "$2='$temp'"
+    eval "$2='$(grep -Pohr -m 1 "(?<=^#)[ ].*\w*" $1 | sed "s/^ *//g" | sed "s/<.*>//g" | tr -d '\015' | tr -d '\012'| tr -d '#')'"
 }
 
-# Determines whether something is BOTH
-function asm_arm_or_both(){
-    if [[ "$1" =~ .*azure-resource-manager.* && "$1" =~ .*azure-resource-manager.* ]]; then
-        echo "-"
-    else
-        if [[ "$1" =~ .*azure-resource-manager.* ]]; then
-            echo "arm-"
-        else
-            if [[ "$1" =~ .*azure-service-management.* ]]; then
-                echo "asm-"
-            fi
-
-        fi
-    fi
-}
 
 #        if [[ "$NewNameSlug" =~ .*asm.* ]]; then
 #            echo "BUT is does have asm in $NewNameSlug..."
 #        fi
-
-
-function windows_linux_both(){
-
-    if [[ "$Windows" =~ .*_.* ]]; then
-             echo "FIRST: It's Windows!!!"
-    elif [[ "$contentID" =~ .*windows.* || "$MSTgtPltfrm" =~ .*windows.* || "$NewNameSlug" =~ .*windows.* ]]; then
-            echo "SECOND PASS: It's STILL Windows!!!"
-            pause "second pass...."
-    elif [[ "$Linux" =~ .*_.* ]]; then
-            echo "FIRST: It's Linux!!!"
-    elif [[ "$contentID" =~ .*linux.* || "$MSTgtPltfrm" =~ .*linux.* || "$NewNameSlug" =~ .*linux.* ]]; then
-            echo "SECOND PASS: It's STILL Linux!!!"
-            pause "second pass...."
-    fi
-}
 
 # replaces underscores with hyphens
 function norm_hypens(){
@@ -89,57 +61,6 @@ function norm_hypens(){
 ## 5. remove any -linux- and set "linux" flag
 ## 6. take the stem and write: "virtual-machines"-windows|linux-arm|asm-remaining slug
 
-function build_new_name(){
-#    set -x
-    local new_name=""
-    local current_name="$NewNameSlug"
-    #echo "Current name is : $current_name"
-    # replace underscores with hyphens
-    current_name=${current_name//_/-}
-    
-    # remove virtual-machine[s] and clean hyphens
-    new_name=${current_name//virtual-machines/}
-    new_name=${new_name//virtual-machine/}
-    new_name=${new_name//-vms-/}
-    new_name=${new_name//-vm-/}
-    new_name=${new_name#vms-}
-    new_name=${new_name#vm-}
-    new_name=${new_name%-vms}
-    new_name=${new_name%-vm}
-    new_name=${new_name%-}
-    new_name=${new_name#-}
-    
-    # remove linux and clean hyphens
-    new_name=${new_name//linux/}
-    new_name=${new_name%-}
-    new_name=${new_name#-}
-    
-    # remove windows and clean hyphens
-    new_name=${new_name//windows-server/}
-    new_name=${new_name//windows/}
-    new_name=${new_name%-}
-    new_name=${new_name#-}
-
-    # remove asm and clean hyphens
-    new_name=${new_name//-asm-/}
-    new_name=${new_name%-asm}
-    new_name=${new_name#asm-}
-    
-    # remove arm and clean hyphens
-    # must not remove swarm or farm
-    new_name=${new_name//-arm-/}
-    new_name=${new_name%-arm}
-    new_name=${new_name#-}
-    new_name=${new_name%-}
-    
-    new_name=${new_name//--/-}
-    
-    #echo "New name stem is : $new_name"
-    
-    #pause "...."
-    local final_name="virtual-machines-$1-$(asm_arm_or_both $tags)$new_name.md" 
-    echo ${final_name//--/-}
-}
 
 ## remove after testing
 function write_new_name(){
@@ -298,10 +219,10 @@ do
     
 # debugging section
 
-    if [[ ! "$Assigned" == "davidmu" ]]; then 
+#    if [[ ! "$Assigned" == "davidmu" ]]; then 
         #echo "It's not David"
-        continue
-    fi
+#        continue
+#    fi
 
     #echo "$contentID -- checking for ssh-from"
 #   if [[ "$NewNameSlug" =~ .*ssh_from.* ]]; then
@@ -316,7 +237,7 @@ do
 
     get_tags $contentID.md tags
     get_Title $contentID.md title
-    echo "Tags are read as: $tags"
+   echo "Tags are read as: $tags"
     # clean the title
     title=${title% }
     title=${title# }
@@ -333,32 +254,29 @@ do
     
 #    "Link_file_name": "article:file-name",
     
-
-# create the redirect string
-
-docURLFragment="/documentation/articles"
-echo "<add key=\"$docURLFragment/$FILESTEM/\" value=\"$docURLFragment/$NEWFILESTEM/\" /> <!-- $(date +%D) -->" >> $RedirectLOG
-
     if [[ "$Include" =~ .*_.* ]]; then
         #echo "It's an include file....so here we pass the variable to the include script using \"source\""
         new_topic_name=$(write_new_name)
         source ~/workspace/gitwork/bash/renamecommonfile.sh $contentID.md $new_topic_name
+        continue
     elif [[ "$Windows" =~ .*_.* ]]; then
+        continue
         #echo "It's a windows target, so move into the rename windows process..."
         new_topic_name=$(write_new_name)
         #source ~/workspace/gitwork/bash/renamefile.sh $contentID.md $new_topic_name
 
     elif [[ "$Linux" =~ .*_.* ]]; then
-       #echo "It's a linux target, so move into the rename linux process..."
+        continue
+        #echo "It's a linux target, so move into the rename linux process..."
         new_topic_name=$(write_new_name)
         #source ~/workspace/gitwork/bash/renamefile.sh $contentID.md $new_topic_name
     else
         echo "$(timestamp): Can't detect what OS is the intended target for line $COUNT: $contentID" >> $LOG
+        continue
         #no_tags $LOG $Assigned $URL $contentID.md $Author MSTgtPltfrm $(norm_hypens $NewNameSlug) $Include $Windows $Linux $RedirectTarget
     fi
  
  #   write_filename_logs $new_topic_name
-
 	echo "Assigned: $Assigned"
     echo "Title for $contentID.md: $title"
     echo "URL: $URL"
@@ -379,6 +297,12 @@ echo "<add key=\"$docURLFragment/$FILESTEM/\" value=\"$docURLFragment/$NEWFILEST
 
     #source ~/workspace/gitwork/bash/renamefile.sh $contentID.md $new_topic_name
     #find $(git rev-parse --show-toplevel) -name "*.md-e" -type f -exec rm {} +
+
+    # create the redirect string
+
+    docURLFragment="/documentation/articles"
+    echo "<add key=\"$docURLFragment/$FILESTEM/\" value=\"$docURLFragment/$NEWFILESTEM/\" /> <!-- $(date +%D) -->" >> $RedirectLOG
+
 
 done < $1
 

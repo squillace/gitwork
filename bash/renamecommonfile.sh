@@ -32,58 +32,108 @@ else
 fi
 
 # Algorithm is as follows:
+# 1. capture the metdata at the top of the file.
+# 2. Create a windows and linux wrapper file, with a copy of the metadata on top of each.
+# 3. Create an include file, and place the remainder of the content in the file.
+# 4. Move all media from the previous media path to the include/media/path  
+# 5. Submit all as one PR, pushing and then submitting.
+#   ISSUES: mainly naming issues. if you have a naming collision, you have to stop processing until you can get through them all.
+#   ISSUES: do NOT submit separate commits; do all your work, and submit only one commit. Easier merging in the end.
 
+FILE_METADATA=$(sed -n '/<properties/,/ms.author.*/p' $FILE)
+echo "$(grep -noP '(?<=ms.author=\").*/>' $FILE | cut -f1 -d:)"
 
+k=1
+while read line;
+do
+        echo "Line # $k: $line"
+        ((k++))
+done < $FILE
+echo "Total number of lines in file: $k"
 
+body=$(grep --after-context=999999 -P "^#{1}.*\w*.*" $FILE)
+
+#echo "$FILE"
+WRAPPER_FILE_Windows=$NEWFILE
+WRAPPER_FILE_Linux=$NEWFILE
+
+WRAPPER_FILE_Linux=${WRAPPER_FILE_Linux//common/common-linux}
+WRAPPER_FILE_Windows=${WRAPPER_FILE_Windows//common/common-windows}
+
+#echo "$WRAPPER_FILE_Linux"
+#echo "$WRAPPER_FILE_Windows"
+
+#echo $body > $WRAPPER_FILE_Linux
+#echo $body > $WRAPPER_FILE_Windows
+
+#echo -e "$FILE_METADATA\\n$(cat $WRAPPER_FILE_Linux)" > $WRAPPER_FILE_Linux
+#echo -e "$FILE_METADATA\\n$(cat $WRAPPER_FILE_Windows)" > $WRAPPER_FILE_Windows
+
+#i=1
+#while IFS='' read -r line || [[ -n "$line" ]]; 
+#do
+#    if [[ "$i" == "$line_count" ]]; then
+#        continue
+#    body+="$line"
+#    (( i++ ))
+#done < "$FILE"
+
+# have to escape for SED
+#echo "$body"
+
+# set file variables
 FILESTEM=${FILE%.md}
 NEWFILESTEM=${NEWFILE%.md}
 MEDIAPATH="media/$FILESTEM/"
-echo "testing for $MEDIAPATH*.*: $(ls $MEDIAPATH | wc -l) files -- $(ls $MEDIAPATH)"
+
+#pause "stop here"
+
+#echo "testing for $MEDIAPATH*.*: $(ls $MEDIAPATH | wc -l) files -- $(ls $MEDIAPATH)"
 
 # BUG: One-off for known media directories with capitalizations
-if [[ $FILESTEM =~ .*[-lob-]*.* || $FILESTEM =~ .*weblogic.* ]]; then
+#if [[ $FILESTEM =~ .*[-lob-]*.* || $FILESTEM =~ .*weblogic.* ]]; then
     # pause "hey, $FILE is -lob- or webLogic... rewriting file"
-    FILESTEM=${FILESTEM//-lob-/-LOB-}
-    FILESTEM=${FILESTEM//weblogic/webLogic}
+#    FILESTEM=${FILESTEM//-lob-/-LOB-}
+#    FILESTEM=${FILESTEM//weblogic/webLogic}
     #pause "FILESTEM is now $FILESTEM....."
-fi
+#fi
 
-check_tags_value="No worries."
 # OK, ready to work. First, set the bit for the PR to check the tags value:
-if [[ ! "$tags" =~ .*azure-resource-manager.* && ! "$tags" =~ .*azure-service-management.* ]]; then
+#if [[ ! "$tags" =~ .*azure-resource-manager.* && ! "$tags" =~ .*azure-service-management.* ]]; then
 
-    if [[ "$NewNameSlug" =~ .*asm.* ]]; then
-        check_tags_value="Check them."
+#    if [[ "$NewNameSlug" =~ .*asm.* ]]; then
+#        check_tags_value="Check them."
         #pause "tags: $tags; slug: $NewNameSlug"
-    fi
+#    fi
     # log the fact that we can't do anything with this file and move on
-    no_tags $LOG $Assigned $URL $contentID.md $Author MSTgtPltfrm $(norm_hypens $NewNameSlug) $Include $Windows $Linux $RedirectTarget
+#    no_tags $LOG $Assigned $URL $contentID.md $Author MSTgtPltfrm $(norm_hypens $NewNameSlug) $Include $Windows $Linux $RedirectTarget
     #pause "Press ENTER to continue..."
     #continue
-fi
-
-# continue    
+#fi
+pause "loop..."
+ continue 
 
 # first, create branch for the rename:
 temp_name=$(write_new_name)
 temp_name=${temp_name%.md} 
 echo $temp_name
-git checkout -b "$Assigned-$temp_name" release-vm-refactor
+#git checkout -b "$Assigned-$temp_name" release-vm-refactor
 
 ## first, move the file
 echo "Moving \"$FILE\" to \"$NEWFILE\" in git..."
 
-#continue
 
-git mv "$FILE" "$NEWFILE"
+
+# moving to the bottom:
+#git mv "$FILE" "$NEWFILE"
     
 # search for and rewire all inbound links 
 echo "searching the repository for \"/$FILE\" references..."
 
 find "$GITROOT" -name "*.md" -type f -exec grep -il "$FILE" {} + | xargs -I {} gsed -i'' -e s/"$FILE"/"$NEWFILE"/i {}
-git ls-files -m "$GITROOT" *.md | xargs -I {} git add {}
+#git ls-files -m "$GITROOT" *.md | xargs -I {} git add {}
 #git add $NEWFILE
-git commit -m "Renaming $FILE into $NEWFILE."
+#git commit -m "Renaming $FILE into $NEWFILE."
 #git status
 
 #pause "Now, go and examine the file $FILE and $NEWFILE..."
@@ -114,13 +164,17 @@ if [ $(ls "$MEDIAPATH" 2>/dev/null | wc -l) -ne 0 ]; then
         # shows us that only LOB and webLogic have caps in them in the articles/virtual-machines/media folder, we're just special casing those, above.
         
         mkdir "media/$NEWFILESTEM"
-        git mv "media/$FILESTEM/$CURRENT_MEDIAFILE" "media/$NEWFILESTEM/$CURRENT_MEDIAFILE"
+        # again, moving creates a commit. Want to break this into a cp and an rm, which is what git does anyway.
+        #git mv "media/$FILESTEM/$CURRENT_MEDIAFILE" "media/$NEWFILESTEM/$CURRENT_MEDIAFILE"
+        git cp "media/$FILESTEM/$CURRENT_MEDIAFILE" "media/$NEWFILESTEM/$CURRENT_MEDIAFILE"
+        git rm "media/$FILESTEM/$CURRENT_MEDIAFILE" 
 
         # rewrite inbound media links from the moved media file.
         find "$GITROOT" -name "*.md" -type f -exec grep -il "$CURRENT_MEDIAPATH" {} + | xargs -I {} gsed -i'' -e s/"$SED_OLD_PATH"/"$SED_NEW_PATH"/i {}
-	        
+	    
+        # You can add, but you may NOT commit    
         git ls-files -m "$GITROOT" *.md | xargs -I {} git add {}
-        git commit -m "Moving $CURRENT_MEDIAPATH to $NEWMEDIAPATH"
+        #git commit -m "Moving $CURRENT_MEDIAPATH to $NEWMEDIAPATH"
     done
 
 fi
@@ -129,16 +183,21 @@ fi
 # clean up the sed modifications
 find $(git rev-parse --show-toplevel) -name "*.md-e" -type f -exec rm {} +
 
+#Do the committing for the files you changed. Maybe you can't avoid it.
+#git mv "$FILE" "$NEWFILE"
+#git cp "$FILE" "$NEWFILE"
+#git rm "$FILE" 
+
 # Do the push and PR creation:
 
 #echo "pushing to $Assigned-$temp_name:$Assigned-$temp_name"
 #pause "Assigned: $Assigned"
-$(git push -v squillace "$Assigned-$temp_name":"$Assigned-$temp_name")
-echo "$(timestamp): $(hub pull-request -m "[$Assigned]:[$NEWFILESTEM] Tagcheck: \"$tags\"" -b squillace:vm-refactor-staging -h squillace:$Assigned-$temp_name $(git rev-parse HEAD))" >> $LOG 
+#$(git push -v squillace "$Assigned-$temp_name":"$Assigned-$temp_name")
+#echo "$(timestamp): $(hub pull-request -m "[$Assigned]:[$NEWFILESTEM] Tagcheck: \"$tags\"" -b squillace:vm-refactor-staging -h #squillace:$Assigned-$temp_name $(git rev-parse HEAD))" >> $LOG 
 
 #hub pull-request -m "trying one more time" -b squillace:release-vm-refactor -h squillace:vm-refactor-staging $(git rev-parse HEAD)
 
-git checkout vm-refactor-staging
+#git checkout vm-refactor-staging
 #git status
 
 
