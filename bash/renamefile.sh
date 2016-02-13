@@ -66,7 +66,7 @@ fi
 temp_name=$(write_new_name)
 temp_name=${temp_name%.md} 
 echo $temp_name
-git checkout -b "$Assigned-$temp_name" release-vm-refactor
+#git checkout -b "$Assigned-$temp_name" release-vm-refactor
 
 ## first, move the file
 echo "Moving \"$FILE\" to \"$NEWFILE\" in git..."
@@ -131,12 +131,12 @@ find $(git rev-parse --show-toplevel) -name "*.md-e" -type f -exec rm {} +
 
 #echo "pushing to $Assigned-$temp_name:$Assigned-$temp_name"
 #pause "Assigned: $Assigned"
-$(git push -v squillace "$Assigned-$temp_name":"$Assigned-$temp_name")
-echo "$(timestamp): $(hub pull-request -m "[$Assigned]:[$NEWFILESTEM] Tagcheck: \"$tags\"" -b squillace:vm-refactor-staging -h squillace:$Assigned-$temp_name $(git rev-parse HEAD))" >> $LOG 
+#$(git push -v squillace "$Assigned-$temp_name":"$Assigned-$temp_name")
+#echo "$(timestamp): $(hub pull-request -m "[$Assigned]:[$NEWFILESTEM] Tagcheck: \"$tags\"" -b squillace:vm-refactor-staging -h squillace:$Assigned-$temp_name $(git rev-parse HEAD))" >> $LOG 
 
 #hub pull-request -m "trying one more time" -b squillace:release-vm-refactor -h squillace:vm-refactor-staging $(git rev-parse HEAD)
 
-git checkout vm-refactor-staging
+#git checkout vm-refactor-staging
 #git status
 
 

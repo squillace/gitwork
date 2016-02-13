@@ -33,50 +33,111 @@ fi
 
 # Algorithm is as follows:
 # 1. capture the metdata at the top of the file.
+# 1.5 capture the header of the file
+# 1.7 strip the header from the body
 # 2. Create a windows and linux wrapper file, with a copy of the metadata on top of each.
 # 3. Create an include file, and place the remainder of the content in the file.
-# 4. Move all media from the previous media path to the include/media/path  
+# 3.5 whack the metadata to insert vm-linux and vm-windows in the metadata
+# 4. Move all media from the previous media path to the include/media/path -- don't need any art in the wrappers 
 # 5. Submit all as one PR, pushing and then submitting.
 #   ISSUES: mainly naming issues. if you have a naming collision, you have to stop processing until you can get through them all.
 #   ISSUES: do NOT submit separate commits; do all your work, and submit only one commit. Easier merging in the end.
 
 FILE_METADATA=$(sed -n '/<properties/,/ms.author.*/p' $FILE)
-echo "$(grep -noP '(?<=ms.author=\").*/>' $FILE | cut -f1 -d:)"
+#pause "$(grep -noP '(?<=ms.author=\").*/>' $FILE | cut -f1 -d:)"
 
-k=1
-while read line;
-do
-        echo "Line # $k: $line"
-        ((k++))
-done < $FILE
-echo "Total number of lines in file: $k"
+## Create the platform target string.
 
-body=$(grep --after-context=999999 -P "^#{1}.*\w*.*" $FILE)
+linux_ms_tgt_platform=$MSTgtPltfrm
+windows_ms_tgt_platform=$MSTgtPltfrm
 
-#echo "$FILE"
+# linuxes
+linux_ms_tgt_platform=${linux_ms_tgt_platform// /}
+linux_ms_tgt_platform=${linux_ms_tgt_platform///vm-linux}
+linux_ms_tgt_platform=${linux_ms_tgt_platform//vm-multiple/vm-linux}
+linux_ms_tgt_platform=${linux_ms_tgt_platform//vm-windows/vm-linux}
+linux_ms_tgt_platform=${linux_ms_tgt_platform//na/vm-linux}
+linux_ms_tgt_platform=${linux_ms_tgt_platform//NA/vm-linux}
+
+## one-offs
+linux_ms_tgt_platform=${linux_ms_tgt_platform//Windows/vm-linux}
+linux_ms_tgt_platform=${linux_ms_tgt_platform//infrastructure/infrastructure,vm-linux}
+linux_ms_tgt_platform=${linux_ms_tgt_platform//ibiza/ibiza,vm-linux}
+linux_ms_tgt_platform=${linux_ms_tgt_platform//command-line-interface/command-line-interface,vm-linux}
+linux_ms_tgt_platform=${linux_ms_tgt_platform%d}
+
+# windowses
+
+windows_ms_tgt_platform=${windows_ms_tgt_platform// /}
+windows_ms_tgt_platform=${windows_ms_tgt_platform///vm-windows}
+windows_ms_tgt_platform=${windows_ms_tgt_platform//vm-multiple/vm-windows}
+windows_ms_tgt_platform=${windows_ms_tgt_platform//vm-linux/vm-windows}
+windows_ms_tgt_platform=${windows_ms_tgt_platform//na/vm-windows}
+windows_ms_tgt_platform=${windows_ms_tgt_platform//NA/vm-windows}
+
+## one-offs
+windows_ms_tgt_platform=${windows_ms_tgt_platform//Windows/vm-windows}
+windows_ms_tgt_platform=${windows_ms_tgt_platform//infrastructure/infrastructure,vm-windows}
+windows_ms_tgt_platform=${windows_ms_tgt_platform//ibiza/ibiza,vm-windows}
+windows_ms_tgt_platform=${windows_ms_tgt_platform//command-line-interface/command-line-interface,vm-windows}
+windows_ms_tgt_platform=${windows_ms_tgt_platform%d}
+
+# now, fix the metdata up
+linux_ms_tgt_platform=$(echo "$linux_ms_tgt_platform" | gsed s/ms.tgt_pltfrm\.\*/ms.tgt_pltfrm=\"$linux_ms_tgt_platform\"/g)
+windows_ms_tgt_platform=$(echo "$windows_ms_tgt_platform" | gsed s/ms.tgt_pltfrm\.\*/ms.tgt_pltfrm=\"$windows_ms_tgt_platform\"/g)
+
+# echo "New linux extraction: $linux_ms_tgt_platform."
+#echo "New windows extraction: $windows_ms_tgt_platform."
+
+# Write the OS-specific metdata and fix it per wrapper file
+WINDOWS_FILE_METADATA=$(echo "$FILE_METADATA" | gsed s/ms.tgt_pltfrm\.\*/ms.tgt_pltfrm=\"$windows_ms_tgt_platform\"/g)
+LINUX_FILE_METADATA=$(echo "$FILE_METADATA" | gsed s/ms.tgt_pltfrm\.\*/ms.tgt_pltfrm=\"$linux_ms_tgt_platform\"/g)
+
+quick_title=$(grep -P "^#[ ]{1}.*\w*.*" $FILE)
+echo "title: $quick_title"
+
+# grab the include line and excise it. if there's no include line, just process the file
+# and log the fact that you need to fix the include.
+if [[ ! "$(grep ".*AZURE.INCLUDE.*deployment-models.*" -A100000 -m 1 $FILE | wc -l)" -eq 1 ]]; then
+    short_body=$(grep ".*AZURE.INCLUDE.*deployment-models.*" -A100000 -m 1 $FILE | gsed -e 's/.*AZURE.INCLUDE.*deployment-models.*//g')
+else 
+    short_body=$(grep -P "^#[ ]{1}.*\w*.*" -A100000 -m 1 $FILE | gsed -e 's/.*$title.*//g')
+fi
+#printf %s $body
+#$(printf %s "$body" | tail -n +3)
+
+#include_line_number=$(grep  -n ".*AZURE.INCLUDE.*deployment-models.*" -m 1 $FILE | cut -c 1-2)
+
+#echo "$include_line_number"
+#pause "that was the include line number"
+
 WRAPPER_FILE_Windows=$NEWFILE
 WRAPPER_FILE_Linux=$NEWFILE
 
 WRAPPER_FILE_Linux=${WRAPPER_FILE_Linux//common/common-linux}
 WRAPPER_FILE_Windows=${WRAPPER_FILE_Windows//common/common-windows}
 
-#echo "$WRAPPER_FILE_Linux"
-#echo "$WRAPPER_FILE_Windows"
+echo "$WRAPPER_FILE_Linux"
+echo "$WRAPPER_FILE_Windows"
 
-#echo $body > $WRAPPER_FILE_Linux
-#echo $body > $WRAPPER_FILE_Windows
 
-#echo -e "$FILE_METADATA\\n$(cat $WRAPPER_FILE_Linux)" > $WRAPPER_FILE_Linux
-#echo -e "$FILE_METADATA\\n$(cat $WRAPPER_FILE_Windows)" > $WRAPPER_FILE_Windows
+echo "$LINUX_FILE_METADATA" > $WRAPPER_FILE_Linux
+echo "$WINDOWS_FILE_METADATA" > $WRAPPER_FILE_Windows
 
-#i=1
-#while IFS='' read -r line || [[ -n "$line" ]]; 
-#do
-#    if [[ "$i" == "$line_count" ]]; then
-#        continue
-#    body+="$line"
-#    (( i++ ))
-#done < "$FILE"
+echo "" >> $WRAPPER_FILE_Linux
+echo "" >> $WRAPPER_FILE_Windows
+
+echo "$quick_title" >> $WRAPPER_FILE_Linux
+echo "$quick_title" >> $WRAPPER_FILE_Windows
+
+echo "" >> $WRAPPER_FILE_Linux
+echo "" >> $WRAPPER_FILE_Windows
+
+echo "[AZURE.INCLUDE[learn-about-deployment-models](../../includes/learn-about-deployment-models-both-include.md)]" >> $WRAPPER_FILE_Linux
+echo "[AZURE.INCLUDE[learn-about-deployment-models](../../includes/learn-about-deployment-models-both-include.md)]" >> $WRAPPER_FILE_Windows
+
+
+printf %s "$short_body" > $GITROOT/includes/$NEWFILE
 
 # have to escape for SED
 #echo "$body"
@@ -110,7 +171,7 @@ MEDIAPATH="media/$FILESTEM/"
     #pause "Press ENTER to continue..."
     #continue
 #fi
-pause "loop..."
+#pause "loop..."
  continue 
 
 # first, create branch for the rename:

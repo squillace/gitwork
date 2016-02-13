@@ -16,9 +16,9 @@ function get_tags() {
     local FILEPATH=$(find "$GITROOT" -name "$1" -type f)
     #echo "file is $1"
     #echo "gitroot is $GITROOT"
-    #echo "getting complete path is "
-    #find "$GITROOT" -name "$1" -type f
-    #echo $(grep -Pohr "(?<=tags=\").*" $FILEPATH | sed s/\".*//g)
+    #echo "$FILEPATH"
+  #  echo "getting complete path is     $(find $GITROOT -name $1 -type f)"
+  #  echo $(grep -Pohr "(?<=tags=\").*" $FILEPATH | sed s/\".*//g)
     eval "$2='$(grep -Pohr "(?<=tags=\").*(?=\"/>)" $1)'"
 }
 
@@ -207,13 +207,14 @@ do
     echo "Reading line: $COUNT"
     # skip the header in the CSV file
     if [ "$COUNT" -eq 1 ]; then
-        #echo "$timestamp: Header line read."
+        echo "$timestamp: Header line read."
         continue
     fi
 
     # if you can't find the file in the repo, log it and continue on.
-    if [ ! -f $(find "$GITROOT" -name "$contentID.md" -type f) ]; then
-        echo "$(timestamp): The File '$(find "$GITROOT" -name "$contentID.md" -type f)' Does Not Exist" >> $LOG
+    if [[ $(find $GITROOT -name $contentID.md -type f 2>/dev/null | wc -l) -eq 0 ]]; then
+        echo "$(timestamp): The File '$contentID.md' Does Not Exist in this run" >> $LOG
+        #pause "can't find: $contentID.md"
         continue 
     fi
     
@@ -241,7 +242,8 @@ do
     # clean the title
     title=${title% }
     title=${title# }
-    
+
+
     
     # Log the toc stuff
 #    This is the format of the lines for the .resx:
