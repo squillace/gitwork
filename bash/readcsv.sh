@@ -191,6 +191,8 @@ GITROOT=$(git rev-parse --show-toplevel)
 # logging configuration
 LOG=/var/log/readcsv.log
 RedirectLOG=~/redirects.log
+TOC_LOG=~/toc.txt
+TOC_RESX_LOG=~/toc_resx.txt
 OUTPUT=/var/log/output.log
 sudo chown -R rasquill /var/log/
 #echo "Log file is: $LOG."
@@ -242,19 +244,6 @@ do
     # clean the title
     title=${title% }
     title=${title# }
-
-
-    
-    # Log the toc stuff
-#    This is the format of the lines for the .resx:
- 
-#    <data name="Link_file_name" xml:space="preserve">
-#        <value>My title for left-nav</value>
-#    </data>
-    
-#    This is the format for the lines for the .json:
-    
-#    "Link_file_name": "article:file-name",
     
     if [[ "$Include" =~ .*_.* ]]; then
         #echo "It's an include file....so here we pass the variable to the include script using \"source\""
@@ -302,8 +291,7 @@ do
 
     # create the redirect string
 
-    docURLFragment="/documentation/articles"
-    echo "<add key=\"$docURLFragment/$FILESTEM/\" value=\"$docURLFragment/$NEWFILESTEM/\" /> <!-- $(date +%D) -->" >> $RedirectLOG
+
 
 
 done < $1

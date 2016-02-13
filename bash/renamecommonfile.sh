@@ -24,6 +24,13 @@ echo We\'re in working directory "$PWD".
 FILE=$1
 NEWFILE=$2
 
+# set file variables
+FILESTEM=${FILE%.md}
+NEWFILESTEM=${NEWFILE%.md}
+
+# going to have to rework this
+MEDIAPATH="media/$FILESTEM/"
+
 if [ $(find "$GITROOT" -name "$FILE" -type f | wc -l) -ne 0 ]; then
    echo "File '$FILE' exists; renaming it to $NEWFILE"
 else
@@ -96,9 +103,12 @@ LINUX_FILE_METADATA=$(echo "$FILE_METADATA" | gsed s/ms.tgt_pltfrm\.\*/ms.tgt_pl
 quick_title=$(grep -P "^#[ ]{1}.*\w*.*" $FILE)
 echo "title: $quick_title"
 
+this_include=$(grep ".*AZURE.INCLUDE.*deployment-models.*" -m 1 $FILE)
+echo "the include for this file is: $this_include"
 # grab the include line and excise it. if there's no include line, just process the file
 # and log the fact that you need to fix the include.
-if [[ ! "$(grep ".*AZURE.INCLUDE.*deployment-models.*" -A100000 -m 1 $FILE | wc -l)" -eq 1 ]]; then
+short_body=""
+if [[ "$(grep ".*AZURE.INCLUDE.*deployment-models.*" -m 1 $FILE | wc -l)" -eq 1 ]]; then
     short_body=$(grep ".*AZURE.INCLUDE.*deployment-models.*" -A100000 -m 1 $FILE | gsed -e 's/.*AZURE.INCLUDE.*deployment-models.*//g')
 else 
     short_body=$(grep -P "^#[ ]{1}.*\w*.*" -A100000 -m 1 $FILE | gsed -e 's/.*$title.*//g')
@@ -133,46 +143,58 @@ echo "$quick_title" >> $WRAPPER_FILE_Windows
 echo "" >> $WRAPPER_FILE_Linux
 echo "" >> $WRAPPER_FILE_Windows
 
-echo "[AZURE.INCLUDE[learn-about-deployment-models](../../includes/learn-about-deployment-models-both-include.md)]" >> $WRAPPER_FILE_Linux
-echo "[AZURE.INCLUDE[learn-about-deployment-models](../../includes/learn-about-deployment-models-both-include.md)]" >> $WRAPPER_FILE_Windows
+echo "$this_include" >> $WRAPPER_FILE_Linux
+echo "$this_include" >> $WRAPPER_FILE_Windows
 
+echo "" >> $WRAPPER_FILE_Linux
+echo "" >> $WRAPPER_FILE_Windows
+
+echo "stem is $NEWFILESTEM"
+
+echo "[AZURE.INCLUDE[$NEWFILESTEM](../../includes/$NEWFILE)]" >> $WRAPPER_FILE_Linux
+echo "[AZURE.INCLUDE[$NEWFILESTEM](../../includes/$NEWFILE)]" >> $WRAPPER_FILE_Windows
 
 printf %s "$short_body" > $GITROOT/includes/$NEWFILE
 
-# have to escape for SED
-#echo "$body"
+# do the logging work for redirects and to the new files created for toc.
+echo $RedirectLOG
+echo $LOG
+echo $TOC_LOG
+echo $TOC_RESX_LOG
 
-# set file variables
-FILESTEM=${FILE%.md}
-NEWFILESTEM=${NEWFILE%.md}
-MEDIAPATH="media/$FILESTEM/"
+cleaned_quick_title=${quick_title//#/}
+cleaned_quick_title=${cleaned_quick_title# }
 
-#pause "stop here"
+json_string_linux="\"Link_$WRAPPER_FILE_Linux\": \"article:${WRAPPER_FILE_Linux%.md}\","
+json_string_windows="\"Link_$WRAPPER_FILE_Windows\": \"article:${WRAPPER_FILE_Windows%.md}\","
 
-#echo "testing for $MEDIAPATH*.*: $(ls $MEDIAPATH | wc -l) files -- $(ls $MEDIAPATH)"
+echo "$json_string_linux" >> $TOC_LOG
+echo "$json_string_windows" >> $TOC_LOG
 
-# BUG: One-off for known media directories with capitalizations
-#if [[ $FILESTEM =~ .*[-lob-]*.* || $FILESTEM =~ .*weblogic.* ]]; then
-    # pause "hey, $FILE is -lob- or webLogic... rewriting file"
-#    FILESTEM=${FILESTEM//-lob-/-LOB-}
-#    FILESTEM=${FILESTEM//weblogic/webLogic}
-    #pause "FILESTEM is now $FILESTEM....."
-#fi
+read -d '' resx_strings <<EOF
+    <data name="$WRAPPER_FILE_Linux" xml:space="preserve">
+        <value>"$cleaned_quick_title"</value>
+    </data>
+    <data name="$WRAPPER_FILE_Windows" xml:space="preserve">
+        <value>"$cleaned_quick_title"</value>
+    </data>
+EOF
 
-# OK, ready to work. First, set the bit for the PR to check the tags value:
-#if [[ ! "$tags" =~ .*azure-resource-manager.* && ! "$tags" =~ .*azure-service-management.* ]]; then
+echo "$resx_strings" >> $TOC_RESX_LOG
 
-#    if [[ "$NewNameSlug" =~ .*asm.* ]]; then
-#        check_tags_value="Check them."
-        #pause "tags: $tags; slug: $NewNameSlug"
-#    fi
-    # log the fact that we can't do anything with this file and move on
-#    no_tags $LOG $Assigned $URL $contentID.md $Author MSTgtPltfrm $(norm_hypens $NewNameSlug) $Include $Windows $Linux $RedirectTarget
-    #pause "Press ENTER to continue..."
-    #continue
-#fi
-#pause "loop..."
- continue 
+
+# do the redirects based on the $RedirectTarget
+
+echo "$RedirectTarget"
+
+# START HERE
+
+pause "$RedirectTarget"
+    docURLFragment="/documentation/articles"
+    echo "<add key=\"$docURLFragment/$FILESTEM/\" value=\"$docURLFragment/${WRAPPER_FILE_Linux%.md}/\" /> <!-- $(date +%D) -->" >> $RedirectLOG
+    docURLFragment="/documentation/articles"
+    echo "<add key=\"$docURLFragment/$FILESTEM/\" value=\"$docURLFragment/${WRAPPER_FILE_Windows%.md}/\" /> <!-- $(date +%D) -->" >> $RedirectLOG
+
 
 # first, create branch for the rename:
 temp_name=$(write_new_name)
@@ -183,15 +205,16 @@ echo $temp_name
 ## first, move the file
 echo "Moving \"$FILE\" to \"$NEWFILE\" in git..."
 
-
-
 # moving to the bottom:
 #git mv "$FILE" "$NEWFILE"
     
 # search for and rewire all inbound links 
 echo "searching the repository for \"/$FILE\" references..."
 
-find "$GITROOT" -name "*.md" -type f -exec grep -il "$FILE" {} + | xargs -I {} gsed -i'' -e s/"$FILE"/"$NEWFILE"/i {}
+find "$GITROOT" -name "*.md" -type f -exec grep -il "$FILE" {} + | xargs -I {} gsed -i'' -e s/"$FILE"/"$WRAPPER_FILE_Linux"/i {}
+find "$GITROOT" -name "*.md" -type f -exec grep -il "$FILE" {} + | xargs -I {} gsed -i'' -e s/"$FILE"/"$WRAPPER_FILE_Windows"/i {}
+
+ continue 
 #git ls-files -m "$GITROOT" *.md | xargs -I {} git add {}
 #git add $NEWFILE
 #git commit -m "Renaming $FILE into $NEWFILE."
