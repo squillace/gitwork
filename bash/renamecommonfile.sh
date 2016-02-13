@@ -100,26 +100,23 @@ windows_ms_tgt_platform=$(echo "$windows_ms_tgt_platform" | gsed s/ms.tgt_pltfrm
 WINDOWS_FILE_METADATA=$(echo "$FILE_METADATA" | gsed s/ms.tgt_pltfrm\.\*/ms.tgt_pltfrm=\"$windows_ms_tgt_platform\"/g)
 LINUX_FILE_METADATA=$(echo "$FILE_METADATA" | gsed s/ms.tgt_pltfrm\.\*/ms.tgt_pltfrm=\"$linux_ms_tgt_platform\"/g)
 
-quick_title=$(grep -P "^#[ ]{1}.*\w*.*" $FILE)
-echo "title: $quick_title"
+quick_title=$(grep -P "^# *.*\w*.*?" $FILE)
+#echo "title: $quick_title"
 
 this_include=$(grep ".*AZURE.INCLUDE.*deployment-models.*" -m 1 $FILE)
-echo "the include for this file is: $this_include"
+#echo "the include for this file is: $this_include"
+
 # grab the include line and excise it. if there's no include line, just process the file
 # and log the fact that you need to fix the include.
 short_body=""
 if [[ "$(grep ".*AZURE.INCLUDE.*deployment-models.*" -m 1 $FILE | wc -l)" -eq 1 ]]; then
     short_body=$(grep ".*AZURE.INCLUDE.*deployment-models.*" -A100000 -m 1 $FILE | gsed -e 's/.*AZURE.INCLUDE.*deployment-models.*//g')
 else 
-    short_body=$(grep -P "^#[ ]{1}.*\w*.*" -A100000 -m 1 $FILE | gsed -e 's/.*$title.*//g')
+    short_body=$(grep -P "^# *.*\w*.*?" -A100000 -m 1 $FILE | gsed -e 's/.*$title.*//g')
 fi
-#printf %s $body
-#$(printf %s "$body" | tail -n +3)
 
-#include_line_number=$(grep  -n ".*AZURE.INCLUDE.*deployment-models.*" -m 1 $FILE | cut -c 1-2)
 
-#echo "$include_line_number"
-#pause "that was the include line number"
+# =========== file creation =================== #
 
 WRAPPER_FILE_Windows=$NEWFILE
 WRAPPER_FILE_Linux=$NEWFILE
@@ -127,9 +124,24 @@ WRAPPER_FILE_Linux=$NEWFILE
 WRAPPER_FILE_Linux=${WRAPPER_FILE_Linux//common/common-linux}
 WRAPPER_FILE_Windows=${WRAPPER_FILE_Windows//common/common-windows}
 
-echo "$WRAPPER_FILE_Linux"
-echo "$WRAPPER_FILE_Windows"
+# echo "$WRAPPER_FILE_Linux"
+# echo "$WRAPPER_FILE_Windows"
 
+# check that they don't exist yet, or skip them.
+
+if [ $(find "$GITROOT" -name "$WRAPPER_FILE_Linux" -type f | wc -l) -ne 0 ]; then
+   echo "File '$FILE' exists; skipping"
+   pause "$WRAPPER_FILE_Linux already exists but we're about to create it!."
+   continue
+fi
+
+if [ $(find "$GITROOT" -name "$WRAPPER_FILE_Windows" -type f | wc -l) -ne 0 ]; then
+   echo "File '$FILE' exists; skipping"
+   pause "$WRAPPER_FILE_Linux already exists but we're about to create it!."
+   continue
+fi
+
+# They don't exist; so create them
 
 echo "$LINUX_FILE_METADATA" > $WRAPPER_FILE_Linux
 echo "$WINDOWS_FILE_METADATA" > $WRAPPER_FILE_Windows
@@ -149,18 +161,24 @@ echo "$this_include" >> $WRAPPER_FILE_Windows
 echo "" >> $WRAPPER_FILE_Linux
 echo "" >> $WRAPPER_FILE_Windows
 
-echo "stem is $NEWFILESTEM"
+#echo "stem is $NEWFILESTEM"
 
 echo "[AZURE.INCLUDE[$NEWFILESTEM](../../includes/$NEWFILE)]" >> $WRAPPER_FILE_Linux
 echo "[AZURE.INCLUDE[$NEWFILESTEM](../../includes/$NEWFILE)]" >> $WRAPPER_FILE_Windows
 
+
+### here we wrote the new include file; not yet in git
 printf %s "$short_body" > $GITROOT/includes/$NEWFILE
 
-# do the logging work for redirects and to the new files created for toc.
-echo $RedirectLOG
-echo $LOG
-echo $TOC_LOG
-echo $TOC_RESX_LOG
+## ADD the files so that git can track them.
+
+git add "$WRAPPER_FILE_Linux" "$WRAPPER_FILE_Windows" "$GITROOT/includes/$NEWFILE"
+
+# ================ Logging, redirects, and resx filese =============================
+#echo $RedirectLOG
+#echo $LOG
+#echo $TOC_LOG
+#echo $TOC_RESX_LOG
 
 cleaned_quick_title=${quick_title//#/}
 cleaned_quick_title=${cleaned_quick_title# }
@@ -171,7 +189,14 @@ json_string_windows="\"Link_$WRAPPER_FILE_Windows\": \"article:${WRAPPER_FILE_Wi
 echo "$json_string_linux" >> $TOC_LOG
 echo "$json_string_windows" >> $TOC_LOG
 
+
+if [[ "$cleaned_quick_title" -eq "" ]]; then
+    echo "timestamp: the cleaned title for $FILE couldn't be extracted; guessing at backup." >> $LOG
+     
+fi
+
 read -d '' resx_strings <<EOF
+    <!-- for old file: $FILE   -->
     <data name="$WRAPPER_FILE_Linux" xml:space="preserve">
         <value>"$cleaned_quick_title"</value>
     </data>
@@ -180,30 +205,33 @@ read -d '' resx_strings <<EOF
     </data>
 EOF
 
+
+
 echo "$resx_strings" >> $TOC_RESX_LOG
 
 
 # do the redirects based on the $RedirectTarget
 
-echo "$RedirectTarget"
+#echo "${RedirectTarget%,}"
 
-# START HERE
-
-pause "$RedirectTarget"
+if [[ "$RedirectTarget" =~ .*Linux.* ]]; then
     docURLFragment="/documentation/articles"
-    echo "<add key=\"$docURLFragment/$FILESTEM/\" value=\"$docURLFragment/${WRAPPER_FILE_Linux%.md}/\" /> <!-- $(date +%D) -->" >> $RedirectLOG
+    echo "<add key=\"$docURLFragment/$FILESTEM/\" value=\"$docURLFragment/${WRAPPER_FILE_Linux%.md}/\" /> <!-- $(date +%D) -->"
+#    echo "<add key=\"$docURLFragment/$FILESTEM/\" value=\"$docURLFragment/${WRAPPER_FILE_Linux%.md}/\" /> <!-- $(date +%D) -->" >> $RedirectLOG
+else 
     docURLFragment="/documentation/articles"
-    echo "<add key=\"$docURLFragment/$FILESTEM/\" value=\"$docURLFragment/${WRAPPER_FILE_Windows%.md}/\" /> <!-- $(date +%D) -->" >> $RedirectLOG
-
+    echo "<add key=\"$docURLFragment/$FILESTEM/\" value=\"$docURLFragment/${WRAPPER_FILE_Windows%.md}/\" /> <!-- $(date +%D) -->"
+#    echo "<add key=\"$docURLFragment/$FILESTEM/\" value=\"$docURLFragment/${WRAPPER_FILE_Windows%.md}/\" /> <!-- $(date +%D) -->" >> $RedirectLOG
+fi
 
 # first, create branch for the rename:
 temp_name=$(write_new_name)
 temp_name=${temp_name%.md} 
-echo $temp_name
-#git checkout -b "$Assigned-$temp_name" release-vm-refactor
+#echo $temp_name
+git checkout -b "$Assigned-$temp_name" release-vm-refactor
 
 ## first, move the file
-echo "Moving \"$FILE\" to \"$NEWFILE\" in git..."
+echo "Moving \"$FILE\" to \"../../includes/$NEWFILE\" in git..."
 
 # moving to the bottom:
 #git mv "$FILE" "$NEWFILE"
@@ -214,13 +242,7 @@ echo "searching the repository for \"/$FILE\" references..."
 find "$GITROOT" -name "*.md" -type f -exec grep -il "$FILE" {} + | xargs -I {} gsed -i'' -e s/"$FILE"/"$WRAPPER_FILE_Linux"/i {}
 find "$GITROOT" -name "*.md" -type f -exec grep -il "$FILE" {} + | xargs -I {} gsed -i'' -e s/"$FILE"/"$WRAPPER_FILE_Windows"/i {}
 
- continue 
-#git ls-files -m "$GITROOT" *.md | xargs -I {} git add {}
-#git add $NEWFILE
-#git commit -m "Renaming $FILE into $NEWFILE."
-#git status
-
-#pause "Now, go and examine the file $FILE and $NEWFILE..."
+# continue 
 
 # test for and move any media files associated with the original file
 if [ $(ls "$MEDIAPATH" 2>/dev/null | wc -l) -ne 0 ]; then
@@ -233,7 +255,7 @@ if [ $(ls "$MEDIAPATH" 2>/dev/null | wc -l) -ne 0 ]; then
         CURRENT_MEDIAPATH="media/$FILESTEM/$CURRENT_MEDIAFILE"
         # SED escaping
         SED_OLD_PATH=${CURRENT_MEDIAPATH//\//\\/}
-        NEWMEDIAPATH="media/$NEWFILESTEM/$CURRENT_MEDIAFILE"
+        NEWMEDIAPATH="../../includes/media/$NEWFILESTEM/$CURRENT_MEDIAFILE"
         # SED escaping
         SED_NEW_PATH=${NEWMEDIAPATH//\//\\/}
   #      echo "Stem of original file: $FILESTEM"
@@ -247,11 +269,12 @@ if [ $(ls "$MEDIAPATH" 2>/dev/null | wc -l) -ne 0 ]; then
         # as: ls media | grep -o '[^ ]*[A-Z][^ ]*'
         # shows us that only LOB and webLogic have caps in them in the articles/virtual-machines/media folder, we're just special casing those, above.
         
-        mkdir "media/$NEWFILESTEM"
+        mkdir "../../includes/media/$NEWFILESTEM"
         # again, moving creates a commit. Want to break this into a cp and an rm, which is what git does anyway.
+        # BUT: there's no "git cp"
         #git mv "media/$FILESTEM/$CURRENT_MEDIAFILE" "media/$NEWFILESTEM/$CURRENT_MEDIAFILE"
-        git cp "media/$FILESTEM/$CURRENT_MEDIAFILE" "media/$NEWFILESTEM/$CURRENT_MEDIAFILE"
-        git rm "media/$FILESTEM/$CURRENT_MEDIAFILE" 
+        git mv "media/$FILESTEM/$CURRENT_MEDIAFILE" "../../includes/media/$NEWFILESTEM/$CURRENT_MEDIAFILE"
+        #git rm "media/$FILESTEM/$CURRENT_MEDIAFILE" 
 
         # rewrite inbound media links from the moved media file.
         find "$GITROOT" -name "*.md" -type f -exec grep -il "$CURRENT_MEDIAPATH" {} + | xargs -I {} gsed -i'' -e s/"$SED_OLD_PATH"/"$SED_NEW_PATH"/i {}
@@ -263,26 +286,28 @@ if [ $(ls "$MEDIAPATH" 2>/dev/null | wc -l) -ne 0 ]; then
 
 fi
 
-
 # clean up the sed modifications
 find $(git rev-parse --show-toplevel) -name "*.md-e" -type f -exec rm {} +
 
 #Do the committing for the files you changed. Maybe you can't avoid it.
-#git mv "$FILE" "$NEWFILE"
-#git cp "$FILE" "$NEWFILE"
-#git rm "$FILE" 
+# Because the include is a brand new file, we just add it along with everything at once
+git rm "$FILE" 
+git ls-files -m "$GITROOT" *.md | xargs -I {} git add {}
+#git add $NEWFILE
+git commit -m "Renaming $FILE into $NEWFILE."
+git status
 
 # Do the push and PR creation:
 
-#echo "pushing to $Assigned-$temp_name:$Assigned-$temp_name"
+echo "pushing to $Assigned-$temp_name:$Assigned-$temp_name"
 #pause "Assigned: $Assigned"
-#$(git push -v squillace "$Assigned-$temp_name":"$Assigned-$temp_name")
+#(git push -v squillace "$Assigned-$temp_name":"$Assigned-$temp_name")
 #echo "$(timestamp): $(hub pull-request -m "[$Assigned]:[$NEWFILESTEM] Tagcheck: \"$tags\"" -b squillace:vm-refactor-staging -h #squillace:$Assigned-$temp_name $(git rev-parse HEAD))" >> $LOG 
 
-#hub pull-request -m "trying one more time" -b squillace:release-vm-refactor -h squillace:vm-refactor-staging $(git rev-parse HEAD)
-
-#git checkout vm-refactor-staging
+git checkout vm-refactor-staging
 #git status
+
+pause "How'd that go?"
 
 
 
