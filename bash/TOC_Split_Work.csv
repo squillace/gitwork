@@ -50,7 +50,7 @@ cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-choices-create-vm/,virtual-machines-windows-choices-create-vm,cynthn,vm-windows,arm_creation_choices,,__,,,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-tutorial/,virtual-machines-windows-tutorial,cynthn,vm-windows,arm_tutorial,,__,,,
 cynthn,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-tutorial-classic-portal/,virtual-machines-windows-tutorial-classic-portal,cynthn,vm-windows,asm_tutorial,,__,,,
-cynthn,https://azure.microsoft.com/en-us/documentation/articles/vs-azure-tools-virtual-machines-create-manage/,vs-azure-tools-virtual-machines-create-manage,tarcher,na,asm_manage_vms_visual_studio,__,__,__,Windows,
+cynthn,https://azure.microsoft.com/en-us/documentation/articles/vs-azure-tools-virtual-machines-create-manage/,vs-azure-tools-virtual-machines-create-manage,tarcher,na,asm_manage_visual_studio,__,__,__,Windows,
 danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-a8-a9-a10-a11-specs/,virtual-machines-a8-a9-a10-a11-specs,danlep,vm-multiple,a8_a9_a10_a11_specs,__,__,__,Windows,
 danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-allocation-failure/,virtual-machines-allocation-failure,kenazk,ibiza,allocation_failure,__,__,__,Windows,
 danlep,https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-azurerm-versus-azuresm/,virtual-machines-azurerm-versus-azuresm,mahthi,vm-multiple,compare_deployment_models,__,__,__,Windows,

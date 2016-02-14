@@ -29,7 +29,7 @@ function get_Title(){
 #    echo "gitroot is $GITROOT"
 #    echo "getting complete path is $(find "$GITROOT" -name "$1" -type f)"
 
-    # for the record: grep -Pohr -m 1 "^# *.*\w*.*?" $FILEPATH 
+    # for the record: grep -Pohr -m 1 "^# *.*\w*.*" $FILEPATH 
     # grab the first instance of a line that starts with '#' and any spaces that follow.
     # grab the strings in that line
     # remove any leading spaces: sed "s/^ *//g"
@@ -37,10 +37,10 @@ function get_Title(){
     # remove CR : tr -d '\015'
     # remove LF
     # remove any trailing #
-#    local temp="$(grep -Pohr -m 1 "^# *.*\w*.*?" $1)"
+#    local temp="$(grep -Pohr -m 1 "^# *.*\w*.*" $1)"
 #    pause "$temp"
 #    eval "$2='$temp'"
-    eval "$2='$(grep -Pohr -m 1 "^# *.*\w*.*?" $1 | sed "s/^ *//g" | sed "s/<.*>//g" | tr -d '\015' | tr -d '\012'| tr -d '#')'"
+    eval "$2='$(grep -Pohr -m 1 "^#{1} *.*\w*?" $1 | sed "s/^ *//g" | sed "s/<.*>//g" | tr -d '\015' | tr -d '\012'| tr -d '#')'"
 }
 
 
@@ -222,8 +222,8 @@ do
     
 # debugging section
 
-#    if [[ ! "$Assigned" == "davidmu" ]]; then 
-        #echo "It's not David"
+#    if [[ ! "$COUNT" == "53" ]]; then 
+#        echo "It's not David"
 #        continue
 #    fi
 
