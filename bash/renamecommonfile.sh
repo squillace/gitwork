@@ -91,15 +91,15 @@ windows_ms_tgt_platform=${windows_ms_tgt_platform//command-line-interface/comman
 windows_ms_tgt_platform=${windows_ms_tgt_platform%d}
 
 # now, fix the metdata up
-linux_ms_tgt_platform=$(echo "$linux_ms_tgt_platform" | gsed s/ms.tgt_pltfrm\.\*/ms.tgt_pltfrm=\"$linux_ms_tgt_platform\"/g)
-windows_ms_tgt_platform=$(echo "$windows_ms_tgt_platform" | gsed s/ms.tgt_pltfrm\.\*/ms.tgt_pltfrm=\"$windows_ms_tgt_platform\"/g)
+linux_ms_tgt_platform=$(echo "$linux_ms_tgt_platform" | sed s/ms.tgt_pltfrm\.\*/ms.tgt_pltfrm=\"$linux_ms_tgt_platform\"/g)
+windows_ms_tgt_platform=$(echo "$windows_ms_tgt_platform" | sed s/ms.tgt_pltfrm\.\*/ms.tgt_pltfrm=\"$windows_ms_tgt_platform\"/g)
 
 # echo "New linux extraction: $linux_ms_tgt_platform."
 #echo "New windows extraction: $windows_ms_tgt_platform."
 
 # Write the OS-specific metdata and fix it per wrapper file
-WINDOWS_FILE_METADATA=$(echo "$FILE_METADATA" | gsed s/ms.tgt_pltfrm\.\*/ms.tgt_pltfrm=\"$windows_ms_tgt_platform\"/g)
-LINUX_FILE_METADATA=$(echo "$FILE_METADATA" | gsed s/ms.tgt_pltfrm\.\*/ms.tgt_pltfrm=\"$linux_ms_tgt_platform\"/g)
+WINDOWS_FILE_METADATA=$(echo "$FILE_METADATA" | sed s/ms.tgt_pltfrm\.\*/ms.tgt_pltfrm=\"$windows_ms_tgt_platform\"/g)
+LINUX_FILE_METADATA=$(echo "$FILE_METADATA" | sed s/ms.tgt_pltfrm\.\*/ms.tgt_pltfrm=\"$linux_ms_tgt_platform\"/g)
 
 quick_title=$(grep -P -m 1 "^#{1} *.*\w*?" $(find "$GITROOT" -name "$FILE" -type f))
 #echo "title: $quick_title"
@@ -111,9 +111,9 @@ this_include=$(grep ".*AZURE.INCLUDE.*deployment-models.*" -m 1 $(find "$GITROOT
 # and log the fact that you need to fix the include.
 short_body=""
 if [[ "$(grep ".*AZURE.INCLUDE.*deployment-models.*" -m 1 $(find "$GITROOT" -name "$FILE" -type f) | wc -l)" -eq 1 ]]; then
-    short_body=$(grep ".*AZURE.INCLUDE.*deployment-models.*" -A100000 -m 1 $(find "$GITROOT" -name "$FILE" -type f) | gsed -e 's/.*AZURE.INCLUDE.*deployment-models.*//g')
+    short_body=$(grep ".*AZURE.INCLUDE.*deployment-models.*" -A100000 -m 1 $(find "$GITROOT" -name "$FILE" -type f) | sed -e 's/.*AZURE.INCLUDE.*deployment-models.*//g')
 else 
-    short_body=$(grep -P "^#{1} *.*\w*?" -A100000 -m 1 $(find "$GITROOT" -name "$FILE" -type f) | gsed -e 's/.*$title.*//g')
+    short_body=$(grep -P "^#{1} *.*\w*?" -A100000 -m 1 $(find "$GITROOT" -name "$FILE" -type f) | sed -e 's/.*$title.*//g')
 fi
 
 
@@ -129,8 +129,8 @@ link_target_windows=$NEWFILE
 link_target_linux=${link_target_linux//common/common-linux}
 link_target_windows=${link_target_windows//common/common-windows}
 
-#echo "$link_target_linux"
-#echo "$link_target_windows"
+echo "$link_target_linux"
+echo "$link_target_windows"
 #pause "do the links targets look right?"
 
 WRAPPER_FILE_Linux=${WRAPPER_FILE_Linux//common/common-linux}
@@ -203,8 +203,11 @@ printf %s "$short_body" > $GITROOT/includes/$NEWFILE
 
 ## ADD the files so that git can track them.
 echo "adding the new files"
-git add "$WRAPPER_FILE_Linux" "$WRAPPER_FILE_Windows" "$GITROOT/includes/$NEWFILE"
-
+git add -v "$WRAPPER_FILE_Linux" "$WRAPPER_FILE_Windows" "$GITROOT/includes/$NEWFILE"
+git commit -m "committing the files: $WRAPPER_FILE_Linux $WRAPPER_FILE_Windows $GITROOT/includes/$NEWFILE"
+#git status
+#pause "a whole bunch of stuff just happened."
+pause "go look at $GITROOT/includes/$NEWFILE"
 # ================ Logging, redirects, and resx filese =============================
 #echo $RedirectLOG
 #echo $LOG
@@ -213,7 +216,6 @@ git add "$WRAPPER_FILE_Linux" "$WRAPPER_FILE_Windows" "$GITROOT/includes/$NEWFIL
 
 cleaned_quick_title=${quick_title//#/}
 #cleaned_quick_title=${cleaned_quick_title# }
-
 
 linux_article_json_resx_link="${link_target_linux%.md}"
 linux_link_json_resx_link="Link_${linux_article_json_resx_link//-/_}"
@@ -255,70 +257,88 @@ fi
 
 # moving to the bottom:
 #git mv "$FILE" "$NEWFILE"
-#git rm "$(dirname $(find "$GITROOT" -name "$FILE" -type f))/$FILE" 
-    
+#ls $(dirname $(find "$GITROOT" -name "FILESTEM" -type d))
+git rm -v "$(dirname $(find "$GITROOT" -name "$FILE" -type f))" 
+git add -v "$GITROOT/includes/$NEWFILE"
+#git commit -m "Renaming $FILE into $NEWFILE."
+git status
+
 # search for and rewire all inbound links 
 echo "searching the repository for \"$FILE\" references..."
 
+#pause "replacing $FILE with $link_target_linux"
 
+find "$GITROOT" -name "*.md" -type f -exec grep -il "$FILE" {} + | xargs -I {} sed -i'' -e s/"$FILE"/"$link_target_linux"/i {}
+find "$GITROOT" -name "*.md" -type f -exec grep -il "$FILE" {} + | xargs -I {} sed -i'' -e s/"$FILE"/"$link_target_windows"/i {}
 
-find "$GITROOT" -name "*.md" -type f -exec grep -il "$FILE" {} + | xargs -I {} gsed -i'' -e s/"$FILE"/"$link_target_linux"/i {}
-find "$GITROOT" -name "*.md" -type f -exec grep -il "$FILE" {} + | xargs -I {} gsed -i'' -e s/"$FILE"/"$link_target_windows"/i {}
-
-# continue 
 
 # test for and move any media files associated with the original file
+echo "Moving and relinking the media files...."
+
 if [ $(ls "$MEDIAPATH" 2>/dev/null | wc -l) -ne 0 ]; then
-#    ls "$MEDIAPATH"
+    echo "media path= $MEDIAPATH"
    
     # locate media files, and then rewrite all inbound links to THOSE files.  
     for files in $(ls "$MEDIAPATH"*)
     do
-        CURRENT_MEDIAFILE=${files[@]##*/}
-        CURRENT_MEDIAPATH="media/$FILESTEM/$CURRENT_MEDIAFILE"
+        echo "Media file: $(git ls-files ${files[@]##*/})"
+        CURRENT_MEDIAFILE=${files[@]##*/} # this is the current media file name
+        CURRENT_MEDIAPATH="media/$FILESTEM/$CURRENT_MEDIAFILE" # current media subdir from topic dir
         # SED escaping
-        SED_OLD_PATH=${CURRENT_MEDIAPATH//\//\\/}
-        NEWMEDIAPATH="../../includes/media/$NEWFILESTEM/$CURRENT_MEDIAFILE"
+        SED_OLD_PATH=${CURRENT_MEDIAPATH//\//\\/} # same, with / replaced for SED work
+        NEWMEDIAPATH="./media/$NEWFILESTEM/$CURRENT_MEDIAFILE" # the NEW media path of this media file
         # SED escaping
-        SED_NEW_PATH=${NEWMEDIAPATH//\//\\/}
-  #      echo "Stem of original file: $FILESTEM"
-  #      echo "Stem of the new file: $NEWFILESTEM"
-  #      echo "New media path: $NEWMEDIAPATH"
-  #      echo "Current media file: $CURRENT_MEDIAFILE"
-  #      echo "git mv\'ing ${files[@]} to $NEWMEDIAPATH"
+        SED_NEW_PATH=${NEWMEDIAPATH//\//\\/} # same as current media path
+#       echo "Stem of original file: $FILESTEM"
+#       echo "Stem of the new file: $NEWFILESTEM"
+#       echo "New media path: $NEWMEDIAPATH"
+#       echo "Current media file: $CURRENT_MEDIAFILE"
+       echo "git mv\'ing ${files[@]} to $NEWMEDIAPATH"
+#       echo "rewrite the new file's medai links to $MEDIAPATH"
+       local_NEWMEDIAPATH=$NEWMEDIAPATH/$CURRENT_MEDIAFILE
+       local_NEWMEDIAPATH="./$local_NEWMEDIAPATH"
+       local_SED_NEW_PATH=${local_NEWMEDIAPATH//\//\\/}
+	       
+#       pause "local new media link making path $local_SED_NEW_PATH"
         # TODO: Here's the problem. Warning: we are failing to git mv the media files
         # Resolution: on mac, and window, there's case-preserving but insensitive, which means there's no easy way to obtain
         # directories with capitalizations without already having them. BUT... 
         # as: ls media | grep -o '[^ ]*[A-Z][^ ]*'
         # shows us that only LOB and webLogic have caps in them in the articles/virtual-machines/media folder, we're just special casing those, above.
         # are we in the articles directory?
-        echo "$(find $GITROOT -type f -name $FILE)"
+        echo "Here's the file: $(find $GITROOT -type f -name $FILE)"
         if [[ ! "$(find $GITROOT -type f -name $FILE)" =~ .*virtual-machines.* ]]; then
             pause "you figured it out... this shoudl NOT be in vms: $(find $GITROOT -type f -name $FILE)"
             articles_NEWMEDIAPATH="../includes/media/$NEWFILESTEM/$CURRENT_MEDIAFILE"
             # SED escaping
-            articles_SED_NEW_PATH=${articles_NEWMEDIAPATH//\//\\/}
-            #pause "$articles_NEWMEDIAPATH"
-            #pause "$articles_SED_NEW_PATH"
+            articles_SED_NEW_PATH=${MEDIAPATH//\//\\/}
+            pause "SED: new path for relinking: $articles_NEWMEDIAPATH"
             mkdir "$articles_NEWMEDIAPATH"
-            git mv "media/$FILESTEM/$CURRENT_MEDIAFILE" "../includes/media/articles_$NEWFILESTEM/$CURRENT_MEDIAFILE"            
-            find "$GITROOT" -name "*.md" -type f -exec grep -il "$CURRENT_MEDIAPATH" {} + | xargs -I {} gsed -i'' -e s/"$SED_OLD_PATH"/"$articles_SED_NEW_PATH"/i {}
+            pause "now moving media: ../includes/media/articles_$NEWFILESTEM/$CURRENT_MEDIAFILE"
+            git mv -v "media/$FILESTEM/$CURRENT_MEDIAFILE" "../includes/media/articles_$NEWFILESTEM/$CURRENT_MEDIAFILE"            
+            find "$GITROOT" -name "*.md" -type f -exec grep -il "$CURRENT_MEDIAPATH" {} + | xargs -I {} sed -i'' -e s/"$SED_OLD_PATH"/"$SED_NEW_PATH"/i {}
+            git ls-files -v -m "$GITROOT" "$CURRENT_MEDIAPATH" | xargs -I {} git add -v {}
+            git commit -m "moving $CURRENT_MEDIAPATH"
         else
             # we are in the virtual-machines directory
+            
             mkdir "../../includes/media/$NEWFILESTEM"
             # again, moving creates a commit. Want to break this into a cp and an rm, which is what git does anyway.
             # BUT: there's no "git cp"
             #git mv "media/$FILESTEM/$CURRENT_MEDIAFILE" "media/$NEWFILESTEM/$CURRENT_MEDIAFILE"
-            git mv "media/$FILESTEM/$CURRENT_MEDIAFILE" "../../includes/media/$NEWFILESTEM/$CURRENT_MEDIAFILE"
+            pause "moving \"media/$FILESTEM/$CURRENT_MEDIAFILE\" to \"../../includes/media/$NEWFILESTEM/$CURRENT_MEDIAFILE\""
+            git mv -v "media/$FILESTEM/$CURRENT_MEDIAFILE" "../../includes/media/$NEWFILESTEM/$CURRENT_MEDIAFILE"
             #git rm "media/$FILESTEM/$CURRENT_MEDIAFILE" 
 
             # rewrite inbound media links from the moved media file.
-            find "$GITROOT" -name "*.md" -type f -exec grep -il "$CURRENT_MEDIAPATH" {} + | xargs -I {} gsed -i'' -e s/"$SED_OLD_PATH"/"$SED_NEW_PATH"/i {}
+            pause "SED: new path for relinking: $SED_NEW_PATH"
+            find "$GITROOT" -name "*.md" -type f -exec grep -il "$CURRENT_MEDIAPATH" {} + | xargs -I {} sed -i'' -e s/"$SED_OLD_PATH"/"$SED_NEW_PATH"/i {}
+            git ls-files -m "$GITROOT" "$CURRENT_MEDIAPATH" | xargs -I {} git add {}
             
         fi
  
         # You can add, but you may NOT commit    
-        git ls-files -m "$GITROOT" *.md | xargs -I {} git add {}
+        git ls-files -m "$GITROOT" $NEWFILE | xargs -I {} git add {}
         #git commit -m "Moving $CURRENT_MEDIAPATH to $NEWMEDIAPATH"
     done
 
@@ -326,23 +346,26 @@ fi
 
 # clean up the sed modifications
 find $(git rev-parse --show-toplevel) -name "*.md-e" -type f -exec rm {} +
-
 #Do the committing for the files you changed. Maybe you can't avoid it.
 # Because the include is a brand new file, we just add it along with everything at once
 git rm -f "$(dirname $(find "$GITROOT" -name "$FILE" -type f))/$FILE"
 git ls-files -m "$GITROOT" *.md | xargs -I {} git add {}
 #git add $NEWFILE
+pause "so, cancel now and see where you are? or another terminal, maybe?"
+
 git commit -m "Renaming $FILE into $NEWFILE."
 git status
+
+#git reset --hard release-vm-refactor
 
 # Do the push and PR creation:
 
 echo "pushing to $Assigned-$temp_name:$Assigned-$temp_name"
 #pause "Assigned: $Assigned"
-git push -v squillace "$Assigned-$temp_name":"$Assigned-$temp_name"
-echo "$(timestamp): $(hub pull-request -m "[$Assigned]:[$NEWFILESTEM] Tagcheck: \"$tags\"" -b squillace:vm-refactor-staging -h squillace:$Assigned-$temp_name $(git rev-parse HEAD))" >> $LOG 
+#git push -v squillace "$Assigned-$temp_name":"$Assigned-$temp_name"
+#echo "$(timestamp): $(hub pull-request -m "[$Assigned]:[$NEWFILESTEM] Tagcheck: \"$tags\"" -b squillace:vm-refactor-staging -h squillace:$Assigned-$temp_name $(git rev-parse HEAD))" >> $LOG 
 #echo "$timestamp: $(hub pull-request -m "[$Assigned]:[$NEWFILESTEM] Tagcheck: \"$tags\"" -b squillace:vm-refactor-staging -h #squillace:$Assigned-$temp_name $(git rev-parse HEAD)))" >> $LOG 
-
+#git reset --hard vm-refactor-staging
 git checkout vm-refactor-staging
 #git status
 

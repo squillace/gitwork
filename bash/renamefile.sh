@@ -78,7 +78,7 @@ git mv "$FILE" "$NEWFILE"
 # search for and rewire all inbound links 
 echo "searching the repository for \"/$FILE\" references..."
 
-find "$GITROOT" -name "*.md" -type f -exec grep -il "$FILE" {} + | xargs -I {} gsed -i'' -e s/"$FILE"/"$NEWFILE"/i {}
+find "$GITROOT" -name "*.md" -type f -exec grep -il "$FILE" {} + | xargs -I {} sed -i'' -e s/"$FILE"/"$NEWFILE"/i {}
 git ls-files -m "$GITROOT" *.md | xargs -I {} git add {}
 #git add $NEWFILE
 git commit -m "Renaming $FILE into $NEWFILE."
@@ -115,7 +115,7 @@ if [ $(ls "$MEDIAPATH" 2>/dev/null | wc -l) -ne 0 ]; then
         git mv "media/$FILESTEM/$CURRENT_MEDIAFILE" "media/$NEWFILESTEM/$CURRENT_MEDIAFILE"
 
         # rewrite inbound media links from the moved media file.
-        find "$GITROOT" -name "*.md" -type f -exec grep -il "$CURRENT_MEDIAPATH" {} + | xargs -I {} gsed -i'' -e s/"$SED_OLD_PATH"/"$SED_NEW_PATH"/i {}
+        find "$GITROOT" -name "*.md" -type f -exec grep -il "$CURRENT_MEDIAPATH" {} + | xargs -I {} sed -i'' -e s/"$SED_OLD_PATH"/"$SED_NEW_PATH"/i {}
 	        
         git ls-files -m "$GITROOT" *.md | xargs -I {} git add {}
         git commit -m "Moving $CURRENT_MEDIAPATH to $NEWMEDIAPATH"

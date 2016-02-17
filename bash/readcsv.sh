@@ -189,12 +189,12 @@ function no_tags()
 GITROOT=$(git rev-parse --show-toplevel)
 
 # logging configuration
-LOG=/var/log/readcsv.log
+LOG=~/readcsv.log
 RedirectLOG=~/redirects.log
 TOC_LOG=~/toc.txt
 TOC_RESX_LOG=~/toc_resx.txt
-OUTPUT=/var/log/output.log
-sudo chown -R rasquill /var/log/
+OUTPUT=~/output.log
+#sudo chown -R rasquill /var/log/
 #echo "Log file is: $LOG."
 echo "Starting run: $(date)." >> $LOG
 
@@ -204,7 +204,8 @@ title=""
 temp_name=""
 while IFS=, read Assigned URL contentID Author MSTgtPltfrm NewNameSlug Include Windows Linux RedirectTarget
 do
-
+#pause "$contentID: $(find $GITROOT -name $contentID.md -type f 2>/dev/null | wc -l)"    
+   
     ((COUNT++))
     echo "Reading line: $COUNT"
     # skip the header in the CSV file
@@ -217,9 +218,9 @@ do
     if [[ $(find $GITROOT -name $contentID.md -type f 2>/dev/null | wc -l) -eq 0 ]]; then
         echo "$(timestamp): The File '$contentID.md' Does Not Exist in this run" >> $LOG
         #pause "can't find: $contentID.md"
+        echo "File doesn't exist."
         continue 
     fi
-    
 # debugging section
 
 #    if [[ ! "$COUNT" == "53" ]]; then 
@@ -227,12 +228,12 @@ do
 #        continue
 #    fi
 
-    #echo "$contentID -- checking for ssh-from"
-#   if [[ "$NewNameSlug" =~ .*ssh_from.* ]]; then
-#        echo "Here we are..."
-#    else    
-#        continue
-#    fi
+    echo "$contentID -- checking for ssh-from"
+  if [[ "$NewNameSlug" =~ .*fqdn.* ]]; then
+        echo "Here we are..."
+    else    
+        continue
+    fi
     
 # end debugging section
 
@@ -244,11 +245,11 @@ do
     # clean the title
     title=${title% }
     title=${title# }
-    
+
     if [[ "$Include" =~ .*_.* ]]; then
         #echo "It's an include file....so here we pass the variable to the include script using \"source\""
         new_topic_name=$(write_new_name)
-        source ~/workspace/gitwork/bash/renamecommonfile.sh $contentID.md $new_topic_name
+        . ~/Documents/workspace/gitwork/bash/renamecommonfile.sh $contentID.md $new_topic_name
         continue
     elif [[ "$Windows" =~ .*_.* ]]; then
         continue
@@ -295,4 +296,5 @@ do
 
 
 done < $1
+
 
