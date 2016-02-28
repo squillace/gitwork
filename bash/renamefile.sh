@@ -36,7 +36,8 @@ RedirectLOG=~/redirects.txt
 FILESTEM=${FILE%.md}
 NEWFILESTEM=${NEWFILE%.md}
 MEDIAPATH="media/$FILESTEM/"
-echo "testing for $MEDIAPATH*.*: $(ls $MEDIAPATH | wc -l) files -- $(ls $MEDIAPATH)"
+echo "Looking for media files to move..."
+#echo "testing for $MEDIAPATH*.*: $(ls $MEDIAPATH 2>/dev/null | wc -l) files -- $(ls $MEDIAPATH 2>/dev/null)"
 
 # BUG: One-off for known media directories with capitalizations
 if [[ $FILESTEM =~ .*[-lob-]*.* || $FILESTEM =~ .*weblogic.* ]]; then
@@ -46,52 +47,38 @@ if [[ $FILESTEM =~ .*[-lob-]*.* || $FILESTEM =~ .*weblogic.* ]]; then
     #pause "FILESTEM is now $FILESTEM....."
 fi
 
-check_tags_value="No worries."
-# OK, ready to work. First, set the bit for the PR to check the tags value:
-if [[ ! "$tags" =~ .*azure-resource-manager.* && ! "$tags" =~ .*azure-service-management.* ]]; then
-
-    if [[ "$NewNameSlug" =~ .*asm.* ]]; then
-        check_tags_value="Check them."
-        #pause "tags: $tags; slug: $NewNameSlug"
-    fi
-    # log the fact that we can't do anything with this file and move on
-    no_tags $LOG $Assigned $URL $contentID.md $Author MSTgtPltfrm $(norm_hypens $NewNameSlug) $Include $Windows $Linux $RedirectTarget
-    #pause "Press ENTER to continue..."
-    #continue
-fi
-
-# continue    
-
 # first, create branch for the rename:
-temp_name=$(write_new_name)
-temp_name=${temp_name%.md} 
-echo $temp_name
+
+# the tempname is any alias by which it's useful to group PRs programmatically. Not necessary.
+#temp_name=${temp_name%.md} 
+#echo $temp_name
 #git checkout -b "$Assigned-$temp_name" release-vm-refactor
 
 ## first, move the file
 echo "Moving \"$FILE\" to \"$NEWFILE\" in git..."
-
-#continue
-
-git mv "$FILE" "$NEWFILE"
-    
-# search for and rewire all inbound links 
 echo "searching the repository for \"/$FILE\" references..."
 
-find "$GITROOT" -name "*.md" -type f -exec grep -il "$FILE" {} + | xargs -I {} sed -i'' -e s/"$FILE"/"$NEWFILE"/i {}
+# search for and rewire all inbound links 
+# requires gsed or sed that supports case-insensitive command
+find "$GITROOT" -name "*.md" -type f -exec grep -il "$FILE" {} + | xargs -I {} gsed -i'' -e s/"$FILE"/"$NEWFILE"/i {}
+
+## Adds files that have had links modified
 git ls-files -m "$GITROOT" *.md | xargs -I {} git add {}
-#git add $NEWFILE
+
+# preserving history and moving the old file to the new file.
+git mv "$FILE" "$NEWFILE"
+
+#committing here is optional
 git commit -m "Renaming $FILE into $NEWFILE."
 #git status
 
-#pause "Now, go and examine the file $FILE and $NEWFILE..."
-
-# test for and move any media files associated with the original file
+# Now: test for and move any media files associated with the original file
+# if the listing for the media path is not 0, there are media files to move
 if [ $(ls "$MEDIAPATH" 2>/dev/null | wc -l) -ne 0 ]; then
 #    ls "$MEDIAPATH"
    
     # locate media files, and then rewrite all inbound links to THOSE files.  
-    for files in $(ls "$MEDIAPATH"*)
+    for files in $(ls "$MEDIAPATH"* 2>/dev/null)
     do
         CURRENT_MEDIAFILE=${files[@]##*/}
         CURRENT_MEDIAPATH="media/$FILESTEM/$CURRENT_MEDIAFILE"
@@ -111,23 +98,26 @@ if [ $(ls "$MEDIAPATH" 2>/dev/null | wc -l) -ne 0 ]; then
         # as: ls media | grep -o '[^ ]*[A-Z][^ ]*'
         # shows us that only LOB and webLogic have caps in them in the articles/virtual-machines/media folder, we're just special casing those, above.
         
-        mkdir "media/$NEWFILESTEM"
+        mkdir "media/$NEWFILESTEM" 2>/dev/null
         git mv "media/$FILESTEM/$CURRENT_MEDIAFILE" "media/$NEWFILESTEM/$CURRENT_MEDIAFILE"
 
         # rewrite inbound media links from the moved media file.
-        find "$GITROOT" -name "*.md" -type f -exec grep -il "$CURRENT_MEDIAPATH" {} + | xargs -I {} sed -i'' -e s/"$SED_OLD_PATH"/"$SED_NEW_PATH"/i {}
+        # this is only necessary because the internal new file contains links to the old media directory
+        find "$GITROOT" -name "*.md" -type f -exec grep -il "$CURRENT_MEDIAPATH" {} + | xargs -I {} gsed -i'' -e s/"$SED_OLD_PATH"/"$SED_NEW_PATH"/i {}
 	        
+        # adds the newfile.md each time a media link is updated
         git ls-files -m "$GITROOT" *.md | xargs -I {} git add {}
+        # committing here is optional 
         git commit -m "Moving $CURRENT_MEDIAPATH to $NEWMEDIAPATH"
     done
 
 fi
 
-
-# clean up the sed modifications
+# clean up the sed modifications; hangover from the side-effects of "sed"
 find $(git rev-parse --show-toplevel) -name "*.md-e" -type f -exec rm {} +
 
-# Do the push and PR creation:
+# Do the push and PR creation: 
+# optional. Right now, everything has already been 
 
 #echo "pushing to $Assigned-$temp_name:$Assigned-$temp_name"
 #pause "Assigned: $Assigned"
