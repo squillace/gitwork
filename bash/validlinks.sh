@@ -1,6 +1,6 @@
 #!/bin/bash
 
-links=$(grep -oP "(?<=\]\().*?(?=\))" $1)
+links=$(grep -oP "(?<=\]\().*?(?=\))" 2>/dev/null $1)
 
 #echo "$links"
 
