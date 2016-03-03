@@ -10,7 +10,7 @@ GITROOT=$(git rev-parse --show-toplevel)
 echo "Root of the git directory is: $GITROOT"
 RedirectLOG=~/redirects.log
 
-# for testing, pauses with a message until ENTER is pressed
+# for testing, pauses with a message until ENTER is presgsed
 function pause(){
    read -p "$*" input </dev/tty
 }
@@ -51,7 +51,7 @@ fi
 #   ISSUES: mainly naming issues. if you have a naming collision, you have to stop processing until you can get through them all.
 #   ISSUES: do NOT submit separate commits; do all your work, and submit only one commit. Easier merging in the end.
 
-FILE_METADATA=$(sed -n '/<properties/,/ms.author.*/p' $(find "$GITROOT" -name "$FILE" -type f))
+FILE_METADATA=$(gsed -n '/<properties/,/ms.author.*/p' $(find "$GITROOT" -name "$FILE" -type f))
 #pause "$(grep -noP '(?<=ms.author=\").*/>' $FILE | cut -f1 -d:)"
 
 ## Create the platform target string.
@@ -91,15 +91,15 @@ windows_ms_tgt_platform=${windows_ms_tgt_platform//command-line-interface/comman
 windows_ms_tgt_platform=${windows_ms_tgt_platform%d}
 
 # now, fix the metdata up
-linux_ms_tgt_platform=$(echo "$linux_ms_tgt_platform" | sed s/ms.tgt_pltfrm\.\*/ms.tgt_pltfrm=\"$linux_ms_tgt_platform\"/g)
-windows_ms_tgt_platform=$(echo "$windows_ms_tgt_platform" | sed s/ms.tgt_pltfrm\.\*/ms.tgt_pltfrm=\"$windows_ms_tgt_platform\"/g)
+linux_ms_tgt_platform=$(echo "$linux_ms_tgt_platform" | gsed s/ms.tgt_pltfrm\.\*/ms.tgt_pltfrm=\"$linux_ms_tgt_platform\"/g)
+windows_ms_tgt_platform=$(echo "$windows_ms_tgt_platform" | gsed s/ms.tgt_pltfrm\.\*/ms.tgt_pltfrm=\"$windows_ms_tgt_platform\"/g)
 
 # echo "New linux extraction: $linux_ms_tgt_platform."
 #echo "New windows extraction: $windows_ms_tgt_platform."
 
 # Write the OS-specific metdata and fix it per wrapper file
-WINDOWS_FILE_METADATA=$(echo "$FILE_METADATA" | sed s/ms.tgt_pltfrm\.\*/ms.tgt_pltfrm=\"$windows_ms_tgt_platform\"/g)
-LINUX_FILE_METADATA=$(echo "$FILE_METADATA" | sed s/ms.tgt_pltfrm\.\*/ms.tgt_pltfrm=\"$linux_ms_tgt_platform\"/g)
+WINDOWS_FILE_METADATA=$(echo "$FILE_METADATA" | gsed s/ms.tgt_pltfrm\.\*/ms.tgt_pltfrm=\"$windows_ms_tgt_platform\"/g)
+LINUX_FILE_METADATA=$(echo "$FILE_METADATA" | gsed s/ms.tgt_pltfrm\.\*/ms.tgt_pltfrm=\"$linux_ms_tgt_platform\"/g)
 
 quick_title=$(grep -P -m 1 "^#{1} *.*\w*?" $(find "$GITROOT" -name "$FILE" -type f))
 #echo "title: $quick_title"
@@ -111,9 +111,9 @@ this_include=$(grep ".*AZURE.INCLUDE.*deployment-models.*" -m 1 $(find "$GITROOT
 # and log the fact that you need to fix the include.
 short_body=""
 if [[ "$(grep ".*AZURE.INCLUDE.*deployment-models.*" -m 1 $(find "$GITROOT" -name "$FILE" -type f) | wc -l)" -eq 1 ]]; then
-    short_body=$(grep ".*AZURE.INCLUDE.*deployment-models.*" -A100000 -m 1 $(find "$GITROOT" -name "$FILE" -type f) | sed -e 's/.*AZURE.INCLUDE.*deployment-models.*//g')
+    short_body=$(grep ".*AZURE.INCLUDE.*deployment-models.*" -A100000 -m 1 $(find "$GITROOT" -name "$FILE" -type f) | gsed -e 's/.*AZURE.INCLUDE.*deployment-models.*//g')
 else 
-    short_body=$(grep -P "^#{1} *.*\w*?" -A100000 -m 1 $(find "$GITROOT" -name "$FILE" -type f) | sed -e 's/.*$title.*//g')
+    short_body=$(grep -P "^#{1} *.*\w*?" -A100000 -m 1 $(find "$GITROOT" -name "$FILE" -type f) | gsed -e 's/.*$title.*//g')
 fi
 
 
@@ -138,18 +138,6 @@ WRAPPER_FILE_Windows=${WRAPPER_FILE_Windows//common/common-windows}
 
 echo "Linux : $WRAPPER_FILE_Linux"
 echo "Windows: $WRAPPER_FILE_Windows"
-
-#touch $CURRENT_FILE_DIR/$WRAPPER_FILE_Linux
-#touch $CURRENT_FILE_DIR/WRAPPER_FILE_Windows
-
-#WRAPPER_FILE_Linux=$(find "$GITROOT" -name "$CURRENT_FILE_DIR/$WRAPPER_FILE_Linux" -type f)
-#WRAPPER_FILE_Windows=$(find "$GITROOT" -name "$CURRENT_FILE_DIR/$WRAPPER_FILE_Windows" -type f)
-
-
-
-# echo "$WRAPPER_FILE_Linux"
-# echo "$WRAPPER_FILE_Windows"
-
 
 # first, create branch for the rename:
 temp_name=$(write_new_name)
@@ -241,7 +229,7 @@ EOF
 
 echo "$resx_strings" >> $TOC_RESX_LOG
 
-# do the redirects based on the $RedirectTarget
+# do the redirects bagsed on the $RedirectTarget
 
 echo "${RedirectTarget%,}"
 
@@ -268,8 +256,8 @@ echo "searching the repository for \"$FILE\" references..."
 
 #pause "replacing $FILE with $link_target_linux"
 
-find "$GITROOT" -name "*.md" -type f -exec grep -il "$FILE" {} + | xargs -I {} sed -i'' -e s/"$FILE"/"$link_target_linux"/i {}
-find "$GITROOT" -name "*.md" -type f -exec grep -il "$FILE" {} + | xargs -I {} sed -i'' -e s/"$FILE"/"$link_target_windows"/i {}
+find "$GITROOT" -name "*.md" -type f -exec grep -il "$FILE" {} + | xargs -I {} gsed -i'' -e s/"$FILE"/"$link_target_linux"/i {}
+find "$GITROOT" -name "*.md" -type f -exec grep -il "$FILE" {} + | xargs -I {} gsed -i'' -e s/"$FILE"/"$link_target_windows"/i {}
 
 
 # test for and move any media files associated with the original file
@@ -316,7 +304,7 @@ if [ $(ls "$MEDIAPATH" 2>/dev/null | wc -l) -ne 0 ]; then
             mkdir "$articles_NEWMEDIAPATH"
             pause "now moving media: ../includes/media/articles_$NEWFILESTEM/$CURRENT_MEDIAFILE"
             git mv -v "media/$FILESTEM/$CURRENT_MEDIAFILE" "../includes/media/articles_$NEWFILESTEM/$CURRENT_MEDIAFILE"            
-            find "$GITROOT" -name "*.md" -type f -exec grep -il "$CURRENT_MEDIAPATH" {} + | xargs -I {} sed -i'' -e s/"$SED_OLD_PATH"/"$SED_NEW_PATH"/i {}
+            find "$GITROOT" -name "*.md" -type f -exec grep -il "$CURRENT_MEDIAPATH" {} + | xargs -I {} gsed -i'' -e s/"$SED_OLD_PATH"/"$SED_NEW_PATH"/i {}
             git ls-files -v -m "$GITROOT" "$CURRENT_MEDIAPATH" | xargs -I {} git add -v {}
             git commit -m "moving $CURRENT_MEDIAPATH"
         else
@@ -332,7 +320,7 @@ if [ $(ls "$MEDIAPATH" 2>/dev/null | wc -l) -ne 0 ]; then
 
             # rewrite inbound media links from the moved media file.
             pause "SED: new path for relinking: $SED_NEW_PATH"
-            find "$GITROOT" -name "*.md" -type f -exec grep -il "$CURRENT_MEDIAPATH" {} + | xargs -I {} sed -i'' -e s/"$SED_OLD_PATH"/"$SED_NEW_PATH"/i {}
+            find "$GITROOT" -name "*.md" -type f -exec grep -il "$CURRENT_MEDIAPATH" {} + | xargs -I {} gsed -i'' -e s/"$SED_OLD_PATH"/"$SED_NEW_PATH"/i {}
             git ls-files -m "$GITROOT" "$CURRENT_MEDIAPATH" | xargs -I {} git add {}
             
         fi
@@ -344,7 +332,7 @@ if [ $(ls "$MEDIAPATH" 2>/dev/null | wc -l) -ne 0 ]; then
 
 fi
 
-# clean up the sed modifications
+# clean up the gsed modifications
 find $(git rev-parse --show-toplevel) -name "*.md-e" -type f -exec rm {} +
 #Do the committing for the files you changed. Maybe you can't avoid it.
 # Because the include is a brand new file, we just add it along with everything at once
