@@ -339,7 +339,6 @@ find $(git rev-parse --show-toplevel) -name "*.md-e" -type f -exec rm {} +
 git rm -f "$(dirname $(find "$GITROOT" -name "$FILE" -type f))/$FILE"
 git ls-files -m "$GITROOT" *.md | xargs -I {} git add {}
 #git add $NEWFILE
-pause "so, cancel now and see where you are? or another terminal, maybe?"
 
 git commit -m "Renaming $FILE into $NEWFILE."
 git status
@@ -349,7 +348,6 @@ git status
 # Do the push and PR creation:
 
 echo "pushing to $Assigned-$temp_name:$Assigned-$temp_name"
-#pause "Assigned: $Assigned"
 #git push -v squillace "$Assigned-$temp_name":"$Assigned-$temp_name"
 #echo "$(timestamp): $(hub pull-request -m "[$Assigned]:[$NEWFILESTEM] Tagcheck: \"$tags\"" -b squillace:vm-refactor-staging -h squillace:$Assigned-$temp_name $(git rev-parse HEAD))" >> $LOG 
 #echo "$timestamp: $(hub pull-request -m "[$Assigned]:[$NEWFILESTEM] Tagcheck: \"$tags\"" -b squillace:vm-refactor-staging -h #squillace:$Assigned-$temp_name $(git rev-parse HEAD)))" >> $LOG 
@@ -357,7 +355,6 @@ echo "pushing to $Assigned-$temp_name:$Assigned-$temp_name"
 git checkout vm-refactor-staging
 #git status
 
-#pause "How'd that go?"
 
 
 
