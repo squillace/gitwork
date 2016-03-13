@@ -5,20 +5,17 @@
 file=""
 linenum=""
 includetext=""
-while IPS='\:' read entry
+while IPS='\:' read file
 do
-    file=${entry%\:*\:.*}
-    linenum=$(echo "$entry" | sed "s/$file\://g")
-    linenum=${linenum%\:*}
-    includetext=${entry#*\:*\:}
-#    echo "stuff: ${file[@]}"
-    echo "line: $linenum"
-    echo "include: $includetext"
-    echo " file: $file"
-    include=$(<"$includetext")
-    sed -i'' -e "$linenum"d $file
-    echo "$include"
+    echo "$file"
+    linenum=$(grep -onP "\[AZURE.SELECTOR.*" $file | sed "s/:.*//g")
+    lines_to_cut=$(grep -noHPz "(?s)\[AZURE.SELECTOR.*?^\s" $file | sed "/^$/d" | wc -l)
+    echo "we will cut $lines_to_cut lines"
+    ending_line_num=$((linenum + lines_to_cut))
+    echo "starting at line: $linenum"
+    echo "sedline: $linenumd","$ending_line_numd"
+    sed -i'' -e "$linenum","$ending_line_num"d $file 
     
-    #FILE_PATH=$(find $(git rev-parse --show-toplevel) -type f -name "${file[@]}")
-    #MEDIAPATH="$(dirname $FILE_PATH)/media/${file[@]%.md}"
-done <<< "$(ls *.md | xargs -I {} grep -noHP "\[AZURE.SELECTOR" {})"
+    #file_PATH=$(find $(git rev-parse --show-toplevel) -type f -name "${file[@]}")
+    #MEDIAPATH="$(dirname $file_PATH)/media/${file[@]%.md}"
+done <<< "$(ls *.md | xargs -I {} grep -nolHPz "(?s)\[AZURE.SELECTOR.*?^\s" {})"

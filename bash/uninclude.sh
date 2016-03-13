@@ -1,5 +1,5 @@
 #!/bin/bash
-links=$(ls *.md | xargs -I {} grep -noHP "(?<=\[AZURE.INCLUDE \[learn-about-deployment-models\]\().*?(?=\)\])" {})
+#links=$(ls *.md | xargs -I {} grep -noHP "(?<=\[AZURE.INCLUDE \[learn-about-deployment-models\]\().*?(?=\)\])" {})
 # links=$(grep -oP "(?<=\]\().*?(?=\))" 2>/dev/null $1 | sed "s/#.*?//g" | grep -o *.md | uniq)
 #links=$(grep -oP "(?<=\]\().*?(?=\))" 2>/dev/null $1)
 file=""
@@ -21,4 +21,4 @@ do
     
     #FILE_PATH=$(find $(git rev-parse --show-toplevel) -type f -name "${file[@]}")
     #MEDIAPATH="$(dirname $FILE_PATH)/media/${file[@]%.md}"
-done <<< "$(ls *.md | xargs -I {} grep -noHP "(?<=\[AZURE.INCLUDE \[learn-about-deployment-models\]\().*?(?=\)\])" {})"
+done <<< "$(ls *.md | xargs -I {} grep -noHP "(?<=\[AZURE.INCLUDE \[learn-about-deployment-models-both-include\]\().*?(?=\)\])" {})"
