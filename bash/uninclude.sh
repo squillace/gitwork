@@ -21,4 +21,4 @@ do
     
     #FILE_PATH=$(find $(git rev-parse --show-toplevel) -type f -name "${file[@]}")
     #MEDIAPATH="$(dirname $FILE_PATH)/media/${file[@]%.md}"
-done <<< "$(ls *.md | xargs -I {} grep -noHP "(?<=\[AZURE.INCLUDE \[learn-about-deployment-models-both-include\]\().*?(?=\)\])" {})"
+done <<< "$(ls $1 | xargs -I {} grep -noHP "(?<=\[AZURE.INCLUDE \[learn-about-deployment-models-both-include\]\().*?(?=\)\])" {})"

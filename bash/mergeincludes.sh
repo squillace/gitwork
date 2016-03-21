@@ -55,4 +55,4 @@ do
 
 fi
 
-done <<< "$(ls *.md | xargs -I {} grep -loP "\[AZURE.INCLUDE \[virtual-machines-common.*" {})"
+done <<< "$(ls $1 | xargs -I {} grep -loP "\[AZURE.INCLUDE \[virtual-machines-common.*" {})"
