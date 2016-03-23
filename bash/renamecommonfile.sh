@@ -193,9 +193,11 @@ printf %s "$short_body" > $GITROOT/includes/$NEWFILE
 echo "adding the new files"
 git add -v "$WRAPPER_FILE_Linux" "$WRAPPER_FILE_Windows" "$GITROOT/includes/$NEWFILE"
 git commit -m "committing the files: $WRAPPER_FILE_Linux $WRAPPER_FILE_Windows $GITROOT/includes/$NEWFILE"
+
 #git status
 #pause "a whole bunch of stuff just happened."
 pause "go look at $GITROOT/includes/$NEWFILE"
+
 # ================ Logging, redirects, and resx filese =============================
 #echo $RedirectLOG
 #echo $LOG
@@ -214,8 +216,8 @@ windows_link_json_resx_link="Link_${windows_article_json_resx_link//-/_}"
 json_string_linux="\"$linux_link_json_resx_link\": \"article:$linux_article_json_resx_link\","
 json_string_windows="\"$windows_link_json_resx_link\": \"article:$linux_article_json_resx_link\","
 
-echo "$json_string_linux" >> $TOC_LOG
-echo "$json_string_windows" >> $TOC_LOG
+echo "$json_string_linux" # >> $TOC_LOG
+echo "$json_string_windows" # >> $TOC_LOG
 
 read -d '' resx_strings <<EOF
     <!-- for old file: $FILE   -->
@@ -227,7 +229,7 @@ read -d '' resx_strings <<EOF
     </data>
 EOF
 
-echo "$resx_strings" >> $TOC_RESX_LOG
+echo "$resx_strings" # >> $TOC_RESX_LOG
 
 # do the redirects bagsed on the $RedirectTarget
 

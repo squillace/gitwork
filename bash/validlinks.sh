@@ -29,12 +29,22 @@ do
                 echo "$file_only does not exist in the repository"
                 # here we know the link is incorrect, and we know that 
                 file_stem=${file_only%.md}
-                redirectline=$(echo "$remap" | grep -P "$file_stem")
+                redirectline=$(echo "$remap" | grep -P "\/$file_stem\/")
                 if [[ ! "$redirectline" == "" ]]; then
-                    newfilename=$(echo $redirectline | grep -oP "(?<=value=\"/documentation/articles/).*?(?=/)")
-                    echo "Hey: $newfilename"
-                    # fix them all at once
-                    find "$GITROOT" -name "*.md" -type f -exec grep -il "$file_stem" {} + | xargs -I {} gsed -i'' -e s/"$file_stem"/"$newfilename"/i {}
+                    echo "redirect line: $redirectline" 
+                    newfilename=$(echo $redirectline | grep -oP "(?<=value=\"/documentation/articles/).*?(?=/)").md
+                    echo "new link target: $newfilename"
+                    echo "original link target: $file_only"
+                    absolute_original_file=$(find $(git rev-parse --show-toplevel) -type f -name "$file")
+                    absolute_new_file=$(find $(git rev-parse --show-toplevel) -type f -name "$newfilename")
+                    relativeLink=$(realpath $absolute_new_file --relative-to=$file)
+                    echo "here's the relative link that should be there: $relativeLink"
+                    
+                    # SED escaping
+                    SED_OLD_PATH=${file_stem//\//\\/}
+                    # SED escaping
+                    SED_NEW_PATH=${newfilename//\//\\/}
+                    #find "$GITROOT" -name "*.md" -type f -exec grep -il "$file_stem" {} + | xargs -I {} sed -i'' -e s/"$file_stem"/"$newfilename"/i {}
                 fi
             fi
         fi
