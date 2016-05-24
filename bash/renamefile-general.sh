@@ -15,12 +15,15 @@ function pause(){
    read -p "$*" input </dev/tty
 }
 
+#set -x
+#echo "$1: $2"
 # quick parameter checking. In linux, you can rename things into an empty string. :-|
 if (( $# != 2 )); then
     echo "Illegal number of parameters; exiting..."
     echo "parameters are: $@"
     exit 1;
 fi
+#set +x
 
 # starting
 echo "We\'re in working directory $PWD".

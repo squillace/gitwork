@@ -16,6 +16,7 @@ do
 
     for link in $links
         do         
+	echo "$link...."
         if [[ $(ls 2>/dev/null $link | wc -l) -eq 0 ]]; then
             #echo "link is wrong: $link"
             file_only=$(echo $link | grep -oP "[\w-]+\.md" | grep -v \#)
