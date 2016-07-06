@@ -49,8 +49,9 @@ do
     # go and locate the media that WAS referenced in the include content
     MEDIAPATH="../../includes/media/${file[@]%.md}"
     CURRENTFILESTEM=${file[@]%.md}
-    INCLUDEFILESTEM=${CURRENTFILESTEM/linux/common} ### replaces "linux"" with "common". YOU must decide how you wish to modify this, if at all.
-    MEDIAPATH=${MEDIAPATH/linux/common} ### ditto
+    
+    INCLUDEFILESTEM=${CURRENTFILESTEM/windows/common} ### replaces "linux"" with "common". YOU must decide how you wish to modify this, if at all.
+    MEDIAPATH=${MEDIAPATH/windows/common} ### ditto
     FILESTEM=${file%.md}
     echo "Media path: $MEDIAPATH"
     echo "file stem: $FILESTEM"
@@ -71,10 +72,10 @@ do
         git mv -v "$CURRENT_MEDIAPATH" "$NEWMEDIAPATH"
         
         #rewrite the media path: 
-        gsed -i'' -e s/"$INCLUDEFILESTEM"/"$CURRENTFILESTEM"/i "$file"
+        sed -i'' -e s/"$INCLUDEFILESTEM"/"$CURRENTFILESTEM"/i "$file"
     done
 
 fi
 # This is actually the beginning of the script: given a filespec/directory, locate all files that have an include of a certain type. 
 # This can be generalized to all includes if you want. 
-done <<< "$(ls $1 | xargs -I {} grep -loP "\[AZURE.INCLUDE \[virtual-machines-common.*" {})"
+done <<< "$(ls *windows* | xargs -I {} grep -loP "\[AZURE.INCLUDE \[virtual-machines-common.*" {})"
