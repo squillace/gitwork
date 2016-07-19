@@ -47,7 +47,7 @@ do
     #sed -i "$linenum"i "$include_content" $file 
     
     # go and locate the media that WAS referenced in the include content
-    MEDIAPATH="../../includes/media/${file[@]%.md}"
+    MEDIAPATH="../../includes/media/${file[@]	}"
     CURRENTFILESTEM=${file[@]%.md}
     
     INCLUDEFILESTEM=${CURRENTFILESTEM/windows/common} ### replaces "linux"" with "common". YOU must decide how you wish to modify this, if at all.

@@ -26,7 +26,6 @@ SOURCE_FILE="$1"
 SOURCE_RESX_FILE=""
 TARGET_FILE="$2/TOC.md"
 
-
 heads=$(cat $SOURCE_FILE | jq -r '. | keys[]')
 # echo "$heads"
 
