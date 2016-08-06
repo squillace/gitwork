@@ -52,8 +52,8 @@ echo "Moving \"$FILE\" to \"$NEWFILE\" in git..."
 echo "searching the repository for \"/$FILE\" references..."
 
 # search for and rewire all inbound links 
-# requires gsed or sed that supports case-insensitive command
-find "$GITROOT" -name "*.md" -type f -exec grep -il "$FILE" {} + | xargs -I {} gsed -i'' -e s/"$FILE"/"$NEWFILE"/i {}
+# requires sed or sed that supports case-insensitive command
+find "$GITROOT" -name "*.md" -type f -exec grep -il "$FILE" {} + | xargs -I {} sed -i'' -e s/"$FILE"/"$NEWFILE"/i {}
 
 ## Adds files that have had links modified
 git ls-files -m "$GITROOT" *.md | xargs -I {} git add {}
@@ -123,7 +123,7 @@ if [ $(ls "$MEDIAPATH" 2>/dev/null | wc -l) -ne 0 ]; then
 
         # rewrite inbound media links from the moved media file.
         # this is only necessary because the internal new file contains links to the old media directory
-        find "$GITROOT" -name "*.md" -type f -exec grep -il "$CURRENT_MEDIAPATH" {} + | xargs -I {} gsed -i'' -e s/"$SED_OLD_PATH"/"$SED_NEW_PATH"/i {}
+        find "$GITROOT" -name "*.md" -type f -exec grep -il "$CURRENT_MEDIAPATH" {} + | xargs -I {} sed -i'' -e s/"$SED_OLD_PATH"/"$SED_NEW_PATH"/i {}
 	        
         # adds the newfile.md each time a media link is updated
         git ls-files -m "$GITROOT" *.md | xargs -I {} git add {}
