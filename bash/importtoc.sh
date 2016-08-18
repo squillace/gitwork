@@ -20,6 +20,7 @@ elif [ $(ls $1 | wc -l) -eq 0 ]; then
 #    echo "hey, the directory doesn't exist!!"
 fi
 
+#validate slugs
 slugs=$(cat ~/workspace/acom/code/acom/Acom.SharedHelpers/ServiceSlugs.cs | grep -oP "(?<=\").*(?=\")")
 
 for slug in $slugs
@@ -30,6 +31,7 @@ fi
 
 done
 
+#validate directories
 dirs=$(find . -type d -d 1)
 
 for dir in $dirs
