@@ -1,0 +1,9 @@
+C:\Users\rasquill\Documents\GitHub\gitwork\dotnet\docstoc\docstoc\bin\Debug\docstoc.exe.config
+C:\Users\rasquill\Documents\GitHub\gitwork\dotnet\docstoc\docstoc\bin\Debug\docstoc.exe
+C:\Users\rasquill\Documents\GitHub\gitwork\dotnet\docstoc\docstoc\bin\Debug\docstoc.pdb
+C:\Users\rasquill\Documents\GitHub\gitwork\dotnet\docstoc\docstoc\obj\Debug\docstoc.csprojResolveAssemblyReference.cache
+C:\Users\rasquill\Documents\GitHub\gitwork\dotnet\docstoc\docstoc\obj\Debug\docstoc.Form1.resources
+C:\Users\rasquill\Documents\GitHub\gitwork\dotnet\docstoc\docstoc\obj\Debug\docstoc.Properties.Resources.resources
+C:\Users\rasquill\Documents\GitHub\gitwork\dotnet\docstoc\docstoc\obj\Debug\docstoc.csproj.GenerateResource.Cache
+C:\Users\rasquill\Documents\GitHub\gitwork\dotnet\docstoc\docstoc\obj\Debug\docstoc.exe
+C:\Users\rasquill\Documents\GitHub\gitwork\dotnet\docstoc\docstoc\obj\Debug\docstoc.pdb
