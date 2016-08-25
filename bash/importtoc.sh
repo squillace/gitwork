@@ -21,17 +21,20 @@ elif [ $(ls $1 | wc -l) -eq 0 ]; then
 fi
 
 #validate slugs
+set -x
 slugs=$(cat ~/workspace/acom/code/acom/Acom.SharedHelpers/ServiceSlugs.cs | grep -oP "(?<=\").*(?=\")")
-
+workingdir=""
 for slug in $slugs
 do
- if [[ ! -d $slug ]]; then
-    echo "hey, the directory $slug doesn't exist, but it's a slug.'"
-fi
+    if [[ ! -d $slug ]]; then
+        workingdir=$slug
+        echo "$slug"
+        echo "$(find $(git rev-parse --show-toplevel) -type d -name $slug)"
+        #echo "hey, the directory $slug doesn't exist, but it's a slug.'"
+    fi
 
 done
 
-#validate directories
 dirs=$(find . -type d -d 1)
 
 for dir in $dirs
