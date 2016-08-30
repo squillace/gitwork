@@ -22,11 +22,12 @@ elif [ $(ls $1 | wc -l) -eq 0 ]; then
 fi
 
 #validate slugs
-# set -x
+set -x
 slugs=$(cat ~/workspace/acom/code/acom/Acom.SharedHelpers/ServiceSlugs.cs | grep -oP "(?<=\").*(?=\")")
 workingdir=""
 for slug in $slugs
 do
+    continue
     if [[ ! -d $slug ]]; then
         workingdir=$slug
         echo "$slug"
@@ -41,19 +42,14 @@ dirs=$(find . -type d -d 1)
 for dir in $dirs
 do
     dir=${dir/#.\/}
-    echo "grepping for the directory \"$dir\""
+    #echo "grepping for the directory \"$dir\""
 
     #echo $dir
-    echo $(grep -oP "$dir" ~/workspace/acom/code/acom/Acom.SharedHelpers/ServiceSlugs.cs)
+    #echo $(grep -oP "$dir" ~/workspace/acom/code/acom/Acom.SharedHelpers/ServiceSlugs.cs)
 
 done
 
-function writeTOC(){
-  
 
-}
-
-exit 0
 echo "Import source file: $1"
 echo "Export file target: $2"
 SOURCE_FILE="$1"
@@ -62,25 +58,29 @@ TARGET_FILE="TOC.md"
 # set -x
 heads=$(cat $SOURCE_FILE | jq -r '. | keys_unsorted[]')
 # echo "$heads"
-
-for H1 in $heads
-    do
-    xpath="//data[@name=\""$H1\""]/value/text()"
-    title=$(xmllint --xpath $xpath  $2)
-	echo "# $title" >> $TARGET_FILE
-    subheads=$(cat $SOURCE_FILE | jq -r ".$H1 | keys[]")
-    #echo "$subheads"
-    for H2 in $subheads
+for slug in $slugs
+    ## create the toc.md file location
+    ## locate the json and resx files; if not, throw an exception.
+    ## write the toc files to the toc.md file under discussion; otherwise, write it somewhere else.
+    for H1 in $heads
         do
-            xpath="//data[@name=\""$H2\""]/value/text()"
-            subtitle=$(xmllint --xpath $xpath  $2)
-            article_string=$(cat $SOURCE_FILE | jq -r ".$H1[\"$H2\"]")
-            article_string=${article_string//acom:/https://azure.microsoft.com}
-            article_string=${article_string//msdn:/https://msdn.microsoft.com/en-us/library/azure/}
-            if [[ "$article_string" =~ article:.* ]];then
-                article_string=${article_string//article:/}
-                article_string="$article_string".md
-            fi
-            echo "## [$subtitle]($article_string)" >> $TARGET_FILE
-    done
+        xpath="//data[@name=\""$H1\""]/value/text()"
+        title=$(xmllint --xpath $xpath  $2)
+        echo "# $title" >> $TARGET_FILE
+        subheads=$(cat $SOURCE_FILE | jq -r ".$H1 | keys[]")
+        #echo "$subheads"
+        for H2 in $subheads
+            do
+                xpath="//data[@name=\""$H2\""]/value/text()"
+                subtitle=$(xmllint --xpath $xpath  $2)
+                article_string=$(cat $SOURCE_FILE | jq -r ".$H1[\"$H2\"]")
+                article_string=${article_string//acom:/https://azure.microsoft.com}
+                article_string=${article_string//msdn:/https://msdn.microsoft.com/en-us/library/azure/}
+                if [[ "$article_string" =~ article:.* ]];then
+                    article_string=${article_string//article:/}
+                    article_string="$article_string".md
+                fi
+                echo "## [$subtitle]($article_string)" >> $TARGET_FILE
+        done
+    done 
 done
