@@ -1,5 +1,6 @@
 #!/bin/bash
 
+TOC_FILE="TOC.md"
 # for testing, pauses with a message until ENTER is pressed
 function pause(){
    read -p "$*" input </dev/tty
@@ -7,11 +8,11 @@ function pause(){
 
 # creates a heading for the toc
 function create_heading(){
-   echo "# [$1]($2)" >> $2
+   echo "# [$1]($2)" >> $TOC_FILE
 }
 
 if [ $# -ne 2 ]; then
-    echo "there are not two file targets"
+    echo "Two input files are required."
     exit 1
 elif [ $(ls $1 | wc -l) -eq 0 ]; then
     echo "Can't find the input file $1."
@@ -21,7 +22,7 @@ elif [ $(ls $1 | wc -l) -eq 0 ]; then
 fi
 
 #validate slugs
-set -x
+# set -x
 slugs=$(cat ~/workspace/acom/code/acom/Acom.SharedHelpers/ServiceSlugs.cs | grep -oP "(?<=\").*(?=\")")
 workingdir=""
 for slug in $slugs
@@ -30,7 +31,7 @@ do
         workingdir=$slug
         echo "$slug"
         echo "$(find $(git rev-parse --show-toplevel) -type d -name $slug)"
-        #echo "hey, the directory $slug doesn't exist, but it's a slug.'"
+        echo "hey, the directory $slug doesn't exist, but it's a slug.'"
     fi
 
 done
@@ -39,13 +40,18 @@ dirs=$(find . -type d -d 1)
 
 for dir in $dirs
 do
- dir=${dir/#.\/}
-echo "grepping for the diretory \"$dir\""
+    dir=${dir/#.\/}
+    echo "grepping for the directory \"$dir\""
 
- #echo $dir
- echo $(grep -oP "$dir" ~/workspace/acom/code/acom/Acom.SharedHelpers/ServiceSlugs.cs)
+    #echo $dir
+    echo $(grep -oP "$dir" ~/workspace/acom/code/acom/Acom.SharedHelpers/ServiceSlugs.cs)
 
 done
+
+function writeTOC(){
+  
+
+}
 
 exit 0
 echo "Import source file: $1"
