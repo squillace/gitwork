@@ -7,7 +7,7 @@ function move_files(){
     echo "Type the file pattern and then [ENTER]:"
     read pattern
     #set -x
-    # TODO: this doesn't work'
+    # TODO: this doesn't work if you put it in "$pattern"
     files=$(ls $SOURCE_DIR/$pattern)
     for file in $files
     do
