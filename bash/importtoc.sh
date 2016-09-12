@@ -30,54 +30,43 @@ function create_toc(){
     fi
 
     # we have our files
-    echo "Import source json file: $SOURCE_FILE"
-    echo "Import source resx file: $SOURCE_RESX_FILE"
+    #echo "Import source json file: $SOURCE_FILE"
+    #echo "Import source resx file: $SOURCE_RESX_FILE"
     if [[ ! -d $TARGET_DIR ]]; then
-        echo "there is no $TARGET_DIR"
-        continue
+        #echo "there is no $TARGET_DIR"
+        # continue
 
         heads=$(cat $SOURCE_FILE | jq -r '. | keys_unsorted[]')
-        # echo "$heads"
-        for slug in $slugs
-        do
-            if [[ ! -d $slug ]]; then
-                TARGET_DIR=$slug
-                echo "$slug"
-                echo "$(find $(git rev-parse --show-toplevel) -type d -name $slug)"
-                ## create the toc.md file location
-                ## locate the json and resx files; if not, throw an exception.
-                ## write the toc files to the toc.md file under discussion; otherwise, write it somewhere else.
-                
-                for H1 in $heads
-                    do
-                    xpath="//data[@name=\""$H1\""]/value/text()"
-                    title=$(xmllint --xpath $xpath  $2)
-                    echo "# $title" >> $$TARGET_FILE
-                    subheads=$(cat $SOURCE_FILE | jq -r ".$H1 | keys[]")
-                    #echo "$subheads"
-                    for H2 in $subheads
-                        do
-                            xpath="//data[@name=\""$H2\""]/value/text()"
-                            subtitle=$(xmllint --xpath $xpath  $2)
-                            article_string=$(cat $SOURCE_FILE | jq -r ".$H1[\"$H2\"]")
-                            article_string=${article_string//acom:/https://azure.microsoft.com}
-                            article_string=${article_string//msdn:/https://msdn.microsoft.com/en-us/library/azure/}
-                            if [[ "$article_string" =~ article:.* ]];then
-                                article_string=${article_string//article:/}
-                                article_string="$article_string".md
-                            fi
-                            echo "## [$subtitle]($article_string)" >> $TARGET_FILE
-                    done
-                done 
-            else echo "$slug isn't a directory.'"
-            fi
-
-
+        #echo "doing the heads now:"
+        #echo "$heads"
+        #echo "$(find $(git rev-parse --show-toplevel) -type d -name $slug)"
+        ## create the toc.md file location
+        ## locate the json and resx files; if not, throw an exception.
+        ## write the toc files to the toc.md file under discussion; otherwise, write it somewhere else.
+        for H1 in $heads
+            do
+            xpath="//data[@name=\""$H1\""]/value/text()"
+            title=$(xmllint --xpath $xpath  $2)
+            echo "# $title" >> azure/articles/$1.$TARGET_FILE
+            subheads=$(cat $SOURCE_FILE | jq -r ".$H1 | keys[]")
+            #echo "$subheads"
+            for H2 in $subheads
+                do
+                    xpath="//data[@name=\""$H2\""]/value/text()"
+                    subtitle=$(xmllint --xpath $xpath  $2)
+                    article_string=$(cat $SOURCE_FILE | jq -r ".$H1[\"$H2\"]")
+                    article_string=${article_string//acom:/https://azure.microsoft.com}
+                    article_string=${article_string//msdn:/https://msdn.microsoft.com/en-us/library/azure/}
+                    if [[ "$article_string" =~ article:.* ]];then
+                        article_string=${article_string//article:/}
+                        article_string="$article_string".md
+                    fi
+                    echo "## [$subtitle]($article_string)" >> azure/articles/$1.$TARGET_FILE
+            done
         done
-
     else
-        echo "there IS a $TARGET_DIR"
-#        continue
+        #echo "there IS a $TARGET_DIR"
+        #continue
 
         heads=$(cat $SOURCE_FILE | jq -r '. | keys_unsorted[]')
         # echo "$heads"
@@ -108,10 +97,10 @@ function create_toc(){
                     #set +x 
                     fi
                     if [[ "$article_string" =~ link.* ]]; then
-                        set -x
+                        #set -x
 
                         article_string=${article_string//link:/}
-                        set +x
+                        #set +x
                         fi
                     ## stripping oddity
 
