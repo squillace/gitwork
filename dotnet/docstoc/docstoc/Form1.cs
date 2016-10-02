@@ -69,7 +69,6 @@ namespace docstoc
                         else 
                             // we are a standalone H1
                             node = new TreeNode(Regex.Match(line, titleRegex).Value);
-
                         this.treeView1.Nodes.Add(node);
                     }
                     if (line.StartsWith(@"##"))
@@ -92,6 +91,7 @@ namespace docstoc
             DirectoryInfo dirInfo = new FileInfo(workingTocFile).Directory;
             FileInfo currentFile = dirInfo.GetFiles(e.Node.Tag.ToString()).FirstOrDefault();
             this.richTextBox1.Text = currentFile.OpenText().ReadToEnd();
+            
         }
     }
 }
