@@ -35,25 +35,31 @@ function create_toc(){
     if [[ ! -d $TARGET_DIR ]]; then
         #echo "there is no $TARGET_DIR"
         # continue
-
+        set -x
+        if [[ $TARGET_DIR =~ .*azure-resource-group.* ]]; then
+            continue
+        fi
+        set +x
         heads=$(cat $SOURCE_FILE | jq -r '. | keys_unsorted[]')
-        #echo "doing the heads now:"
-        #echo "$heads"
-        #echo "$(find $(git rev-parse --show-toplevel) -type d -name $slug)"
+
         ## create the toc.md file location
         ## locate the json and resx files; if not, throw an exception.
         ## write the toc files to the toc.md file under discussion; otherwise, write it somewhere else.
         for H1 in $heads
             do
             xpath="//data[@name=\""$H1\""]/value/text()"
-            title=$(xmllint --xpath $xpath  $2)
+            echo "xpath: $xpath"
+            set -x
+            echo "$H1: $SOURCE_RESX_FILE"
+            title=$(xmllint --xpath $xpath  $2 | xargs)
+            set +x
             echo "# $title" >> azure/articles/$1.$TARGET_FILE
             subheads=$(cat $SOURCE_FILE | jq -r ".$H1 | keys[]")
             #echo "$subheads"
             for H2 in $subheads
                 do
                     xpath="//data[@name=\""$H2\""]/value/text()"
-                    subtitle=$(xmllint --xpath $xpath  $2)
+                    subtitle=$(xmllint --xpath $xpath  $2 | xargs)
                     article_string=$(cat $SOURCE_FILE | jq -r ".$H1[\"$H2\"]")
                     article_string=${article_string//acom:/https://azure.microsoft.com}
                     article_string=${article_string//msdn:/https://msdn.microsoft.com/en-us/library/azure/}
@@ -67,7 +73,9 @@ function create_toc(){
     else
         #echo "there IS a $TARGET_DIR"
         #continue
-
+        if [[ ! $TARGET_DIR =~ .*azure-resource-group.* ]]; then
+            continue
+        fi
         heads=$(cat $SOURCE_FILE | jq -r '. | keys_unsorted[]')
         # echo "$heads"
         for H1 in $heads
@@ -75,15 +83,20 @@ function create_toc(){
             # replace &amp;
             H1=${H1//&amp;/&}
             xpath="//data[@name=\""$H1\""]/value/text()"
-            title=$(xmllint --xpath $xpath  $SOURCE_RESX_FILE)
+            set -x
+            title=$(xmllint --xpath $xpath  $SOURCE_RESX_FILE | xargs echo)
             title=${title//&amp;/&}
+            set +x
             echo "# $title" >> $TARGET_DIR$TARGET_FILE
             subheads=$(cat $SOURCE_FILE | jq -r ".$H1 | keys[]")
             #echo "$subheads"
             for H2 in $subheads
                 do
-                    xpath="//data[@name=\""$H2\""]/value/text()"
-                    subtitle=$(xmllint --xpath $xpath  $SOURCE_RESX_FILE)
+                    subxpath="//data[@name=\""$H2\""]/value/text()"
+                    echo "subxpath: $subxpath"
+                    set -x
+                    subtitle=$(xmllint --xpath $xpath  $SOURCE_RESX_FILE | xargs echo)
+                    set +x
                     subtitle=${subtitle//&amp;/&}
                     article_string=$(cat $SOURCE_FILE | jq -r ".$H1[\"$H2\"]")
                     article_string=${article_string//acom:/https://azure.microsoft.com}
@@ -103,11 +116,12 @@ function create_toc(){
                         #set +x
                         fi
                     ## stripping oddity
-
+                    
                     echo "## [$subtitle]($article_string)" >> $TARGET_DIR$TARGET_FILE
             done
         done 
     fi
+
 }
 
 

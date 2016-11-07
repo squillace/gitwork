@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #  (?<=\[.+\]\()[a-zA-Z]{3,}://[a-zA-Z0-9\.]+/*[a-zA-Z0-9/\\%_.\-]*[:0-9]*\?*[a-zA-Z0-9/\\%_.=&amp;]*
-markdownlinks="\[.*\]\(.*\)"
+markdownlinks="\[.+?\]\(.+?\)"
 
 urlregex="[a-zA-Z]{3,}://[a-zA-Z0-9\.]+/*[a-zA-Z0-9/\\%_.\-]*[:0-9]*\?*[a-zA-Z0-9/\\%_.=&amp;]*"
 
@@ -11,6 +11,7 @@ urlregex="[a-zA-Z]{3,}://[a-zA-Z0-9\.]+/*[a-zA-Z0-9/\\%_.\-]*[:0-9]*\?*[a-zA-Z0-
 #linkregex="\[.+\]\([a-zA-Z]{3,}://[a-zA-Z0-9\.]+/*[a-zA-Z0-9/\\%_.\-]*[:0-9]*\?*[a-zA-Z0-9/\\%_.=&amp;]*"
 linkregex="\[.+\](\(|: )[a-zA-Z]{3,}://[a-zA-Z0-9\.]+/*[a-zA-Z0-9/\\%_.\-]*[:0-9]*\?*[a-zA-Z0-9/\\%_.=&amp;]*"
 
-foundlinks=$(egrep -o -i "$linkregex" $1 | sort | uniq -u | egrep -o -i "$urlregex")
+foundlinks=$(egrep -o -i "$markdownlinks" $1 | sort | uniq -u)
+# foundlinks=$(egrep -o -i "$linkregex" $1 | sort | uniq -u | egrep -o -i "$urlregex")
 echo "$foundlinks"
 # echo "all links: $(egrep -o '$markdownlinks' $1 | sort | uniq -u)

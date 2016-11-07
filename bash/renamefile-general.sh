@@ -25,9 +25,10 @@ fi
 # starting
 echo "We\'re in working directory $PWD".
 FILE=$1
-NEWFILE=$2
+NEW_FILE_BASENAME=$(basename $2)
+NEW_ABSOLUTE_FILE=$2
 
-if [ $(find "$GITROOT" -name "$FILE" -type f | wc -l) -ne 0 ]; then
+if [ $(find "$GITROOT" -name "$(basename $FILE)" -type f | wc -l) -ne 0 ]; then
    echo "File '$FILE' exists; renaming it to $NEWFILE"
 else
    echo "The File '$FILE' Does Not Exist" # >> $LOG

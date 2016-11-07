@@ -29,6 +29,8 @@ function create_toc(){
         exit 1
     fi
 
+
+    echo "\"File\",\"TOC Title\",\"TOC Node name\",\"TOC Name\",\"Author\"" > test.csv
     # we have our files
     #echo "Import source json file: $SOURCE_FILE"
     #echo "Import source resx file: $SOURCE_RESX_FILE"
@@ -47,7 +49,7 @@ function create_toc(){
             do
             xpath="//data[@name=\""$H1\""]/value/text()"
             title=$(xmllint --xpath $xpath  $2)
-            echo "# $title" >> azure/articles/$1.$TARGET_FILE
+            #echo "# $title" >> azure/articles/$1.$TARGET_FILE
             subheads=$(cat $SOURCE_FILE | jq -r ".$H1 | keys[]")
             #echo "$subheads"
             for H2 in $subheads
@@ -61,7 +63,9 @@ function create_toc(){
                         article_string=${article_string//article:/}
                         article_string="$article_string".md
                     fi
-                    echo "## [$subtitle]($article_string)" >> azure/articles/$1.$TARGET_FILE
+                    # $1 is the toc name itself when no directory located
+                    echo "\"$article_string\",\"$title\",\"$subtitle\",\"$1\",\"Author\""
+ #                   echo "## [$subtitle]($article_string)" >> test.csv
             done
         done
     else
@@ -77,7 +81,7 @@ function create_toc(){
             xpath="//data[@name=\""$H1\""]/value/text()"
             title=$(xmllint --xpath $xpath  $SOURCE_RESX_FILE)
             title=${title//&amp;/&}
-            echo "# $title" >> $TARGET_DIR$TARGET_FILE
+            #echo "# $title" >> $TARGET_DIR$TARGET_FILE
             subheads=$(cat $SOURCE_FILE | jq -r ".$H1 | keys[]")
             #echo "$subheads"
             for H2 in $subheads
@@ -103,11 +107,12 @@ function create_toc(){
                         #set +x
                         fi
                     ## stripping oddity
-
-                    echo "## [$subtitle]($article_string)" >> $TARGET_DIR$TARGET_FILE
+                    echo "\"$article_string\",\"$title\",\"$subtitle\",\"$TARGET_DIR\",\"Author\""
+#                    echo "## [$subtitle]($article_string)" >> test.csv
             done
         done 
     fi
+
 }
 
 

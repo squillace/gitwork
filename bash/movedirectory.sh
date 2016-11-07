@@ -11,7 +11,11 @@ function move_files(){
     files=$(ls $SOURCE_DIR/$pattern)
     for file in $files
     do
-        echo "$file"
+        echo "Source directory: $(find $(git rev-parse --show-toplevel) -type f -name .)/$SOURCE_DIR"
+        echo "absolute file: $file"
+        echo "file itself: $(basename $file)"
+        echo "target URL should be :$(find $(git rev-parse --show-toplevel) -type f -name .)/$TARGET_DIR/$(basename $file)"
+        source ~/workspace/gitwork/bash/renamefile-general.sh $file $(find $(git rev-parse --show-toplevel) -type f -name .)/$TARGET_DIR/$(basename $file)
     done
     #set +x
 }
