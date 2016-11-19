@@ -36,6 +36,8 @@ namespace links
             string targetPattern = "";
             bool show_help = false;
 
+            Console.WriteLine(Directory.GetCurrentDirectory());
+
             var p = new OptionSet() {
                 { "h|help",  "Displays this help for \"move\"", v => show_help = v != null },
                 { "r|redirect", "Indicates that moved file should be replaced with a redirect file to the new target; default is false.", v => redirects = true  },
@@ -61,50 +63,26 @@ namespace links
 
             string message;
 
-            if (!IsValidated(argList))
+
+            GitMover mover = new GitMover(argList[0], argList[1], redirects, commit); ;
+            try
+            {
+                mover.Move();
+                mover.Dispose();
+            }
+            catch (Exception ex)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write("Error: ");
+                Console.Write("Error: {0}: ", ex.Message);
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("At least one source file is required and a target file path.");
                 Console.ResetColor();
                 ShowHelp(p);
-            }
-            else {
-
-                GitMover mover = new GitMover(argList[0], argList[1], redirects, commit);
-                try
-                {
-                    mover.Move();
-                }
-                catch (Exception)
-                {
-                    mover.Unwind();
-                    throw;
-                }
+                mover.Unwind();
 
             }
-            //Console.ReadLine();
 
-        }
 
-        private static bool IsValidated(List<string> argList)
-        {
-
-            try
-            {
-                var sourceFiles = Directory.EnumerateFiles(System.Environment.CurrentDirectory + argList[0]);
-                var targetDir = argList[1];
-                if (targetDir.Equals("") || sourceFiles.GetEnumerator().Current.Length == 0)
-                {
-                    return false;
-                }
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
         }
 
         static void ShowHelp (OptionSet p)
