@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 
 
 
@@ -37,6 +38,9 @@ namespace buildtoc
             excelReader.IsFirstRowAsColumnNames = true;
             DataSet result = excelReader.AsDataSet();
             DataTable TOCTable = result.Tables["azure-content-pr"];
+
+            MakeTreeViewItemTree(result, TOCTable);
+
             TOC toc = new TOC();
             /*
             foreach (DataColumn column in TOCTable.Columns)
@@ -97,12 +101,51 @@ namespace buildtoc
                 }
                 builder.Append("[" + row.Field<System.String>("Title") + "]");
                 builder.Append("(" + row.Field<System.String>("File (H1 heading)") + ")");
-                Console.WriteLine(builder.ToString());
+                //Console.WriteLine(builder.ToString());
 
                 //6. Free resources (IExcelDataReader is IDisposable)
 
                 excelReader.Close();
             }
             }
+
+        private static void MakeTreeViewItemTree(DataSet result, DataTable tOCTable)
+        {
+            throw new NotImplementedException();
         }
+
+        private void FillTree(DataSet result, DataTable tOCTable, TreeView tvMain)
+        {
+            tvMain.ItemTemplate = GetHeaderTemplate();
+            tvMain.ItemContainerGenerator.StatusChanged +=
+                new EventHandler(ItemContainerGenerator_StatusChanged);
+
+            foreach (WorldArea area in _list)
+            {
+                tvMain.Items.Add(area);
+            }
+        }
+
+        void ItemContainerGenerator_StatusChanged(object sender, EventArgs e)
+        {
+            if (tvMain.ItemContainerGenerator.Status == GeneratorStatus.ContainersGenerated)
+            {
+                foreach (WorldArea area in _list)
+                {
+                    TreeViewItem item =
+                (TreeViewItem)tvMain.ItemContainerGenerator.ContainerFromItem(area);
+                    if (item == null) continue;
+                    item.IsExpanded = true;
+                    if (item.Items.Count == 0)
+                    {
+
+                        foreach (Country country in area.Countries)
+                        {
+                            item.Items.Add(country);
+                        }
+                    }
+                }
+            }
+        }
+    }
     }

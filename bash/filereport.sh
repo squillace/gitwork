@@ -11,10 +11,10 @@ do
     #echo "title: \"$title\""
     #trimmedTitle="$(echo $title | sed s/#//g | awk '{$1=$1};1')"
     #echo "Internal Title: \"$trimmedTitle\""
-    author="$(grep -oP "(?<=ms.author=\").*(?=\")" $file)"
+    author="$(grep -oP "(?<=ms.author:).*" $file)"
     author=${author//[$'\t\r\n ']}
-    service="$(grep -oP "(?<=services=\").*(?=\")" $file)"
+    service="$(grep -oP "(?<=services:).*" $file)"
     echo "\"$shortfile\",\"$title\",\"$service\",\"$author\"" 
-    echo "\"$shortfile\",\"$title\",\"$service\",\"$author\"" >> test.csv
+   # echo "\"$shortfile\",\"$title\",\"$service\",\"$author\"" # >> test.csv
 
 done <<< "$(find $(git rev-parse --show-toplevel)/articles -type f -name "*.md")"

@@ -21,7 +21,7 @@ namespace tocimport
             JObject H1s = json.Root as JObject;
 
             // get the resx
-            XDocument resx = XDocument.Load(@"C:\Users\rasquill\Documents\GitHub\acom\code\acom\ACOM.Resources\Shared\Lefties\virtual-machines-windows.resx");
+            XDocument resx = XDocument.Load(resourceFile);
 
             foreach (JProperty jsonValue in H1s.Properties())
             {
@@ -33,7 +33,7 @@ namespace tocimport
                 }
             }
 
-
+            //Console.ReadKey();
         }
 
 

@@ -1,0 +1,138 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using System.Text.RegularExpressions;
+using Mono.Options;
+using CSITools;
+
+
+/*
+SPEC:
+
+    This program moves files in the azure git repo.
+    1. Dependencies:
+        a) .NET Full build, not core. 
+        b) lib2gitsharp, which requires native binaries to be installed.
+        c) works off the current repo you are in. Neither changes branches nor pulls or pushes. 
+        d) does create commits locally, as it is necessary to commit changes in order to work on those files at moments. git is tricky.
+    2. Algorithm
+        a) takes a file list as an argument in regular path format.
+        b) takes a directory to place them in
+
+ */
+
+namespace links
+{
+    class MainClass
+    {
+
+        private static bool redirects = false;
+        private static bool commit = false;
+
+        public static void Main(string[] args)
+        {
+            string sourcePattern = "";
+            string targetPattern = "";
+            bool show_help = false;
+
+            var p = new OptionSet() {
+                { "h|help",  "Displays this help for \"move\"", v => show_help = v != null },
+                { "r|redirect", "Indicates that moved file should be replaced with a redirect file to the new target; default is false.", v => redirects = true  },
+                { "c|commit", "Indicates that all changes should be committed; default is to leave all changes **staged** (\"added\", in git terminology, but not committed) so that \"git diff --cached\" will immediately display the changes.", v => commit = true }
+            };
+
+            List<string> argList;
+
+            try {
+                argList = p.Parse (args);
+            }
+            catch (OptionException e) {
+                Console.Write ("move: ");
+                Console.WriteLine (e.Message);
+                Console.WriteLine ("Try 'move --help' for more information.");
+                return;
+            }
+
+            if (show_help) {
+                ShowHelp (p);
+                return;
+            }
+
+            string message;
+
+            if (!IsValidated(argList))
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Write("Error: ");
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("At least one source file is required and a target file path.");
+                Console.ResetColor();
+                ShowHelp(p);
+            }
+            else {
+
+                GitMover mover = new GitMover(argList[0], argList[1], redirects, commit);
+                try
+                {
+                    mover.Move();
+                }
+                catch (Exception)
+                {
+                    mover.Unwind();
+                    throw;
+                }
+
+            }
+            //Console.ReadLine();
+
+        }
+
+        private static bool IsValidated(List<string> argList)
+        {
+
+            try
+            {
+                var sourceFiles = Directory.EnumerateFiles(System.Environment.CurrentDirectory + argList[0]);
+                var targetDir = argList[1];
+                if (targetDir.Equals("") || sourceFiles.GetEnumerator().Current.Length == 0)
+                {
+                    return false;
+                }
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        static void ShowHelp (OptionSet p)
+        {
+            /* Two settings. 
+            * 1. Complete markdown link of any type is returned, or only targets.
+            * 2. Links returned are:
+            *         a. external
+            *         b. internal
+            *         c. both
+            * 
+            * 3. If and only if external target links are selected, you can specify either:
+                *         a. check for language entries, or
+                    *         b. check for 404s on http[s] entries
+                        * but not both.
+                        *     
+                        */
+
+            Console.WriteLine ("Usage: move <source filespec> <target filespec>");
+            Console.WriteLine();
+            Console.WriteLine ("Move a single markdown file to the specified path, including media files, and rewrite all inbound links.");
+            Console.WriteLine ();
+            Console.WriteLine ("Options:");
+            p.WriteOptionDescriptions (Console.Out);
+        }
+
+    }
+
+}
+
+
