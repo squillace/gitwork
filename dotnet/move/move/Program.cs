@@ -34,12 +34,22 @@ namespace links
         {
             string sourcePattern = "";
             string targetPattern = "";
+            string workingRepoDir = @"C:\users\rasquill\documents\github\azure-docs-pr\"; // Directory.GetCurrentDirectory();
             bool show_help = false;
 
-            Console.WriteLine(Directory.GetCurrentDirectory());
-
-            var p = new OptionSet() {
-                { "h|help",  "Displays this help for \"move\"", v => show_help = v != null },
+            var p = new OptionSet()
+            { 
+                /*{
+                    "d|directory",
+                    "Specifies the root directory of the repo to use; default is current directory.",
+                    (string v) => workingRepoDir = v
+                },
+                */
+                {
+                    "h|help",
+                    "Displays this help for \"move\"",
+                    v => show_help = v != null
+                },
                 { "r|redirect", "Indicates that moved file should be replaced with a redirect file to the new target; default is false.", v => redirects = true  },
                 { "c|commit", "Indicates that all changes should be committed; default is to leave all changes **staged** (\"added\", in git terminology, but not committed) so that \"git diff --cached\" will immediately display the changes.", v => commit = true }
             };
@@ -61,26 +71,28 @@ namespace links
                 return;
             }
 
-            string message;
-
-
-            GitMover mover = new GitMover(argList[0], argList[1], redirects, commit); ;
+            GitMover mover = null;  
             try
             {
+                mover = new GitMover(workingRepoDir, argList[0], argList[1], redirects, commit);
                 mover.Move();
                 mover.Dispose();
             }
             catch (Exception ex)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write("Error: {0}: ", ex.Message);
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("At least one source file is required and a target file path.");
+                Console.WriteLine("Error: {0}: ", ex.Message);
+                //Console.ForegroundColor = ConsoleColor.Yellow;
+                //Console.WriteLine("At least one source file is required and a target file path.");
                 Console.ResetColor();
                 ShowHelp(p);
-                mover.Unwind();
-
+                if (mover != null)
+                {
+                    mover.Unwind();
+                    mover.Dispose();
+                }
             }
+            Console.ReadLine();
 
 
         }
