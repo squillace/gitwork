@@ -34,7 +34,7 @@ namespace links
         {
             string sourcePattern = "";
             string targetPattern = "";
-            string workingRepoDir = @"C:\users\rasquill\documents\github\azure-docs-pr\"; // Directory.GetCurrentDirectory();
+            string workingRepoDir = Directory.GetCurrentDirectory() + @"\";
             bool show_help = false;
 
             var p = new OptionSet()
@@ -82,8 +82,6 @@ namespace links
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Error: {0}: ", ex.Message);
-                //Console.ForegroundColor = ConsoleColor.Yellow;
-                //Console.WriteLine("At least one source file is required and a target file path.");
                 Console.ResetColor();
                 ShowHelp(p);
                 if (mover != null)
@@ -92,6 +90,7 @@ namespace links
                     mover.Dispose();
                 }
             }
+            Console.WriteLine("done");
             Console.ReadLine();
 
 
