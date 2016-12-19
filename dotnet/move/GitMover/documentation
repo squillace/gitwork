@@ -1,0 +1,23 @@
+The move.exe tool for Windows/Git Bash has been updated to support by default the creation of OPS redirect files and also automatically commits all changes when done. This tool works in either cmd/ps shells with git enabled, or it works in git bash directly. It’s a full .NET piece, so it’s Windows-only currently, but the is also the largest group of users for the entire team.
+
+From any “azure-docs-pr” repo in the root directory, it takes a relative path to an .md file and a path to a new location and:
+1.	Moves the file to the new location and name.
+2.	Replaces the original file with a redirect file to the new location.
+3.	Moves all media files to the proper place, even if they were not in the proper place (corrects all media locations as it moves).
+4.	Locates all links internal to the moved file, and rewrites them in the proper format (corrects all stylistic errors as it moves).
+5.	Locates all include links and rewrites them to the proper location.
+6.	Locates all inbound .md file links across the entire repo, including TOC links, and rewrites them in those files (corrects all stylistic errors as it moves).
+a.	CAVEAT: Does not rewrite html or landing page links or “root docset” links (links of the type “/azure/directory/filename”)
+7.	Commits all changes locally. 
+
+Known issues:
+1.	Does not have installer yet, so you must build from the solution.
+a.	Must refresh the nugget files first, as it depends on lib2gitsharp/binaries and NDepends for relative linking commands.
+2.	Cannot write links FROM an included file to somewhere else that break when the including file moves up or down a directory, thereby potentially breaking links inside the included text. Because an include can be shared, I cannot automatically know whether to fix the include.md internal links or not. These will result in broken links, but as they are relatively few, the remaining work is small.
+a.	Links to the moved file from an include are correctly rewritten.
+
+Please, although I’ve docked this as well as I can in the code, it remains extremely simple code, so any updates as a PR it would benefit from. Please do!!!!
+
+The repo you have to clone or pull from if already updated is: https://github.com/squillace/gitwork.git. 
+
+The actual solution is https://github.com/squillace/gitwork/tree/master/dotnet/move. It has two projects, the Library (“GitMover”) that implements the move (so it can be used from other clients) and a simple console client (“move”). 
