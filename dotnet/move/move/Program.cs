@@ -98,20 +98,6 @@ namespace links
 
         static void ShowHelp (OptionSet p)
         {
-            /* Two settings. 
-            * 1. Complete markdown link of any type is returned, or only targets.
-            * 2. Links returned are:
-            *         a. external
-            *         b. internal
-            *         c. both
-            * 
-            * 3. If and only if external target links are selected, you can specify either:
-                *         a. check for language entries, or
-                    *         b. check for 404s on http[s] entries
-                        * but not both.
-                        *     
-                        */
-
             Console.WriteLine ("Usage: move <source filespec> <target filespec>");
             Console.WriteLine();
             Console.WriteLine ("Move a single markdown file to the specified path, including media files, and rewrite all inbound links.");

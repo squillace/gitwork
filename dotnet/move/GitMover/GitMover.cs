@@ -44,6 +44,15 @@ namespace CSITools
 
         private GitMover() { }
 
+        /// <summary>
+        /// Creates a GitMover, which can move one file to a new location along with all attendant
+        /// changes required. 
+        /// </summary>
+        /// <param name="repoRootDir"></param>
+        /// <param name="source">The target file path relative to the root of a repo. Can be either '\' or '/' usage.</param>
+        /// <param name="target">The path of the new file relative to the root of a repo. Can be either '\' or '/' usage.</param>
+        /// <param name="redirects">If true, creates a redirect file for the moved file. Default is false.</param>
+        /// <param name="commit">If true, commits the changes.</param>
         public GitMover(string repoRootDir, string source, string target, bool redirects, bool commit)
         {
             this.repoWorkingRoot = repoRootDir;
@@ -54,6 +63,7 @@ namespace CSITools
             this.repo = new Repository(repoRootDir);
             var temp = new FileInfo(repoRootDir + sourcePattern);
             this.originalFileContents = temp.OpenText().ReadToEnd();
+
         }
         private void ValidateSource()
         {
@@ -85,15 +95,29 @@ namespace CSITools
             MoveMedia();
             MoveFile();
             WriteRedirectFile();
+            CommitChanges();
 
+        }
 
+        private void CommitChanges()
+        {
+            // Signature signer = new Signature();
+            repo.Commit("Moved " + sourcePattern + " to " + targetPattern);
         }
 
         private void WriteRedirectFile()
         {
             if (redirects)
             {
+                string tempRedirectString = targetPattern.Replace(@"articles\", "").Replace(@"\", @"/");
+                StreamWriter redirectFile = File.CreateText(repo.Info.WorkingDirectory + sourcePattern);
+                redirectFile.WriteLine("---");
+                redirectFile.WriteLine("redirect_url: /azure/" + tempRedirectString);
+                redirectFile.WriteLine("---");
+                redirectFile.Close();
 
+                repo.Stage(repo.Info.WorkingDirectory + sourcePattern);
+                
             }
         }
 
