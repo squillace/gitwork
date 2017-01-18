@@ -50,7 +50,7 @@ namespace links
                     "Displays this help for \"move\"",
                     v => show_help = v != null
                 },
-                { "r|redirect", "Indicates that moved file should be replaced with a redirect file to the new target; default is false.", v => redirects = true  },
+                { "r|redirect", "Indicates that moved file should be replaced with a redirect file to the new target; default is true.", v => redirects = true  },
                 { "c|commit", "Indicates that all changes should be committed; default is to leave all changes **staged** (\"added\", in git terminology, but not committed) so that \"git diff --cached\" will immediately display the changes.", v => commit = true }
             };
 

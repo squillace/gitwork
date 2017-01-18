@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using NDepend.Path;
+using System.Collections.Specialized;
 
 namespace CSITools
 {
@@ -94,9 +95,114 @@ namespace CSITools
             RewriteIncludeLinks();
             MoveMedia();
             MoveFile();
+
+            // Note: when I move this method up, I confuse the git implementation.
+            // There remains something about files that git holds on to until you stage it; can't 
+            // just keep making edits.
+            RewriteOutboundLinks();
             WriteRedirectFile();
             CommitChanges();
 
+        }
+
+        private void RewriteOutboundLinks()
+        {
+
+            // for each outbound target file referenced, grab precisely the link from the file and replace it with the new link
+
+            var outboundLinks = Regex.Matches(
+                File.ReadAllText(repo.Info.WorkingDirectory + targetPattern),
+                @"\[.+?\]\(.+?\)"
+            );
+
+            StringCollection rewrittenLinks = new StringCollection();
+
+            foreach (Match currentOutboundLink in outboundLinks)
+            {
+                // TODO: turns out that I'll keep rewriting multiple links if I don't check first.
+                // check for link rewriting before you do anything at all
+            
+
+                string oldOutboundLink = (Regex.Match(currentOutboundLink.Value, @"(?<=\]\().+?(?=\))")).Value;
+                if (rewrittenLinks.Contains(oldOutboundLink))
+                {
+                    continue;
+                }
+                else
+                {
+                    rewrittenLinks.Add(oldOutboundLink);
+                }
+                if (oldOutboundLink.Contains("app-service-logic-enterprise-integration-agreements.md"))
+                {
+                    ;
+                }
+                // GetRelativePath takes an absolute path to a file and an absolute path to a directory
+                // and returns the relative path from the latter to the former.
+
+
+                // issue:
+                /*
+                 * 
+                 *    at System.IO.Path.CheckInvalidPathChars(String path, Boolean checkAdditional)
+   at System.IO.Path.GetFileName(String path)
+   at CSITools.GitMover.RewriteOutboundLinks() in C:\Users\rasquill\Documents\GitHub\gitwork\dotnet\move\GitMover\GitMover.cs:line 123
+   at CSITools.GitMover.Move() in C:\Users\rasquill\Documents\GitHub\gitwork\dotnet\move\GitMover\GitMover.cs:line 101
+   at links.MainClass.Main(String[] args) in C:\Users\rasquill\Documents\GitHub\gitwork\dotnet\move\move\Program.cs:line 78
+
+
+                {[Azure Key Vault](../key-vault/key-vault-get-started.md "Learn about Key Vault")}  will cause this, which is valid.
+
+                 * */
+                // strip any filename out of the entire link.
+
+                if (oldOutboundLink.IndexOf(' ') != -1)
+                {
+                    oldOutboundLink = oldOutboundLink.Remove(oldOutboundLink.IndexOf(' '));
+                }
+
+                string targetFileName = "";
+                try
+                {
+                   targetFileName = Path.GetFileName(oldOutboundLink);
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+                if (targetFileName.StartsWith(@"#") || oldOutboundLink.StartsWith("http")) // link is internal to an H2; no file to rewrite; or external
+                {
+                    continue;
+                }
+
+
+
+                var sourceAbsoluteDirectoryPath 
+                    = (Path.GetDirectoryName(repo.Info.WorkingDirectory + targetPattern) + Path.DirectorySeparatorChar.ToString()).ToAbsoluteDirectoryPath();
+
+                // Required: must let the repo go find the target file. An exception will be thrown if it doesn't exist; 
+                // POSSIBLE BUG: once we allow files in the repo to be unique only within a directory, it's possible that this will not resolve with only one, 
+                // introducing a bug. Only way THEN will be to search for file AND subdirectory. Not doing that now.
+                var targetIndexEntryFromRepo = (from t in repo.Index where t.Path.Contains(targetFileName) select t).FirstOrDefault();
+
+                // Now we can construct the absolute path. Could have done this with strings, but.... 
+                var targetAbsoluteOutboundLinkPath =
+                    (Path.GetDirectoryName(repo.Info.WorkingDirectory + targetIndexEntryFromRepo.Path) + @"\" + targetFileName).ToAbsoluteFilePath();
+                 
+                //    var relativeFilePath2 = absoluteFilePath2.GetRelativePathFrom(absoluteDirectoryPath);
+                var test = targetAbsoluteOutboundLinkPath.GetRelativePathFrom(sourceAbsoluteDirectoryPath);
+                string newTargetLink = test.ToString().Replace(@"\", @"/");
+                if (newTargetLink.StartsWith(@"./"))
+                {
+                    newTargetLink = newTargetLink.Remove(0, 2);
+                }
+
+                string replacementHTML = (File.ReadAllText(repo.Info.WorkingDirectory + targetPattern))
+                    .Replace(oldOutboundLink, newTargetLink);
+                // go back to linux links:
+                //replacementHTML = replacementHTML.Replace(@"\", @"/");
+                File.WriteAllText(repo.Info.WorkingDirectory + targetPattern, replacementHTML);
+                repo.Stage(repo.Info.WorkingDirectory + targetPattern);
+            }
         }
 
         private void CommitChanges()
@@ -159,7 +265,7 @@ namespace CSITools
                     (Path.GetFullPath(repo.Info.WorkingDirectory + includeFile.Path)).ToAbsoluteFilePath();
 
                 //      var relativeFilePath2 = absoluteFilePath2.GetRelativePathFrom(absoluteDirectoryPath);
-                string newIncludeRelativeLink = targetIncludeAbsoluteFilePath.GetRelativePathFrom(fromAbsoluteDirectoryPath).ToString();
+                string newIncludeRelativeLink = targetIncludeAbsoluteFilePath.GetRelativePathFrom(fromAbsoluteDirectoryPath).ToString().Replace(@"\", @"/");
                 if (newIncludeRelativeLink.StartsWith(@".\"))
                 {
                     newIncludeRelativeLink = newIncludeRelativeLink.Remove(0, 2);
@@ -168,8 +274,8 @@ namespace CSITools
                 string replacementHTML = (File.ReadAllText(repo.Info.WorkingDirectory + sourcePattern))
                     .Replace(oldIncludeRelativeLink, newIncludeRelativeLink);
                 // go back to linux links:
-                replacementHTML = replacementHTML.Replace(@"\", @"/");
-                ;
+                // replacementHTML = replacementHTML.Replace(@"\", @"/");
+                
                 File.WriteAllText(repo.Info.WorkingDirectory + sourcePattern, replacementHTML);
             }
 
@@ -177,6 +283,7 @@ namespace CSITools
 
         private void RewriteInboundLinks()
         {
+            
             string originalDirName = Path.GetDirectoryName(repo.Info.WorkingDirectory + sourcePattern);
             string originalFileName = Path.GetFileName(sourcePattern);
             string targetDirName = Path.GetDirectoryName(repo.Info.WorkingDirectory + targetPattern);
@@ -186,6 +293,7 @@ namespace CSITools
                             where i.Path.Contains(".md")
                             && (i.Path.Contains("articles")
                             || i.Path.Contains("includes"))
+
                             select i;
 
             Regex justFilePattern = new Regex(originalFileName);
@@ -196,20 +304,20 @@ namespace CSITools
                 if (justFilePattern.IsMatch(File.ReadAllText(repo.Info.WorkingDirectory + file.Path)))
                 {
                     // get all matches in links
-                    var oldInboundLinks = Regex.Matches(
+                    var oldInboundLinks = Regex.Match(
                         File.ReadAllText(repo.Info.WorkingDirectory + file.Path),
                         @"(?<=\]\()\S*" + originalFileName
                     );
 
 
-                    var targetAbsoluteDirectoryPath = (
+                    var sourceAbsoluteDirectoryPath = (
                         Path.GetDirectoryName(repo.Info.WorkingDirectory + file.Path) + Path.DirectorySeparatorChar.ToString()).ToAbsoluteDirectoryPath();
-                    var targetAbsoluteLinkPath =
+                    var targetAbsoluteFilePath =
                         (repo.Info.WorkingDirectory + targetPattern).ToAbsoluteFilePath();
 
                     //      var relativeFilePath2 = absoluteFilePath2.GetRelativePathFrom(absoluteDirectoryPath);
                     // Make relative link to new location
-                    string newInboundLink = targetAbsoluteLinkPath.GetRelativePathFrom(targetAbsoluteDirectoryPath).ToString();
+                    string newInboundLink = targetAbsoluteFilePath.GetRelativePathFrom(sourceAbsoluteDirectoryPath).ToString();
                     if (newInboundLink.StartsWith(@".\"))
                     {
                         newInboundLink = newInboundLink.Remove(0, 2);
@@ -218,13 +326,10 @@ namespace CSITools
 
 
                     // for each link match, replace that with the new, relative link.
-                    foreach (Match inboundLinkMatch in oldInboundLinks)
-                    {
-                        Regex currentRegex = new Regex(inboundLinkMatch.Value);
-                        string replaceText = currentRegex.Replace(File.ReadAllText(repo.Info.WorkingDirectory + file.Path), newInboundLink);
+                    // BUG: if the file is the same name but in a different location, we need to do this only once for all things.
+                        string replaceText = File.ReadAllText(repo.Info.WorkingDirectory + file.Path).Replace(oldInboundLinks.Value, newInboundLink);
                         File.WriteAllText(repo.Info.WorkingDirectory + file.Path, replaceText);
                         repo.Stage(file.Path);
-                    }
                 }
              }
         }
@@ -232,6 +337,8 @@ namespace CSITools
 
         private void MoveFile()
         {
+            // Why move does not create the directory, I have no idea. But it killed about two days figuring it out 
+            // given that the error message is crazy bad.
             if (!Directory.Exists(Path.GetDirectoryName(repo.Info.WorkingDirectory + targetPattern)))
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(repo.Info.WorkingDirectory + targetPattern));
@@ -249,7 +356,7 @@ namespace CSITools
             foreach (KeyValuePair<string, string> mediaFileEntry in mediaLinkMap)
             {
                 string oldPath = mediaFileEntry.Key.ToString(); 
-                string newPath = mediaFileEntry.Value.ToString(); 
+                string newPath = mediaFileEntry.Value.ToString().ToLower(); 
 
                 // make sure the moving directory exists, or EVERYTHING WILL FAIL.
                 if (!Directory.Exists(Path.GetDirectoryName(newPath)))
@@ -314,7 +421,7 @@ namespace CSITools
 
                 //      var relativeFilePath2 = absoluteFilePath2.GetRelativePathFrom(absoluteDirectoryPath);
                 var test = targetAbsoluteMediaPath.GetRelativePathFrom(targetAbsoluteDirectoryPath);
-                string newMediaLink = test.ToString();
+                string newMediaLink = test.ToString().Replace(@"\", @"/");
                 if (newMediaLink.StartsWith(@".\"))
                 {
                     newMediaLink = newMediaLink.Remove(0,2);
@@ -323,8 +430,7 @@ namespace CSITools
                 string replacementHTML = (File.ReadAllText(repo.Info.WorkingDirectory + sourcePattern))
                     .Replace(oldMediaLink, newMediaLink);
                 // go back to linux links:
-                replacementHTML = replacementHTML.Replace(@"\", @"/");
-                ;
+                // replacementHTML = replacementHTML.Replace(@"\", @"/");
                 File.WriteAllText(repo.Info.WorkingDirectory + sourcePattern, replacementHTML);
             }
         }
@@ -384,9 +490,10 @@ namespace CSITools
                         + Path.GetFileNameWithoutExtension(targetPattern).ToLower()
                         + @"\"
                         + Path.GetFileName(realSourcePath).ToLower();
-
-                imageLocationList.Add(realSourcePath, targetMediaPath);
-
+                if (!imageLocationList.ContainsKey(realSourcePath))
+                {
+                    imageLocationList.Add(realSourcePath, targetMediaPath);
+                }
             }
             return imageLocationList;
         }
@@ -400,28 +507,11 @@ namespace CSITools
         /// would be "media\</param>
         /// <param name="fromFolder">the absolute path to a source directory.</param>
         /// <returns></returns>
-        private string GetRelativePath(string toFileSpec, string fromFolder)
-        {
-            fromFolder = fromFolder.Replace(@"/", @"\");
-            fromFolder = Path.Combine(repo.Info.WorkingDirectory, fromFolder);
-            if (!toFileSpec.EndsWith(Path.DirectorySeparatorChar.ToString()))
-            {
-                toFileSpec += Path.DirectorySeparatorChar;
-            }
-            Uri pathUri = new Uri(Path.Combine(fromFolder + toFileSpec));
-
-            // Folders must end in a slash
-            if (!fromFolder.EndsWith(Path.DirectorySeparatorChar.ToString()))
-            {
-                fromFolder += Path.DirectorySeparatorChar;
-            }
-            Uri folderUri = new Uri(fromFolder);
-            return Uri.UnescapeDataString(folderUri.MakeRelativeUri(pathUri).ToString().Replace('/', Path.DirectorySeparatorChar));
-        }
-
+      
         public void Unwind()
         {
             // Force reset the branch to what it was.
+            repo.Reset(ResetMode.Hard);
             this.Dispose();
         }
 
