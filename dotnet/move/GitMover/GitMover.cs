@@ -132,6 +132,7 @@ namespace CSITools
                 {
                     rewrittenLinks.Add(oldOutboundLink);
                 }
+                // test code for links: is no op if not testing
                 if (oldOutboundLink.Contains("app-service-logic-enterprise-integration-agreements.md"))
                 {
                     ;
@@ -300,6 +301,11 @@ namespace CSITools
 
             foreach (IndexEntry file in repoFiles)
             {
+                // test for debugging
+                if (file.Path.Contains("apis-list.md"))
+                {
+                    ;
+                }
                 //  if it has a match: focus!
                 if (justFilePattern.IsMatch(File.ReadAllText(repo.Info.WorkingDirectory + file.Path)))
                 {
@@ -309,7 +315,18 @@ namespace CSITools
                         @"(?<=\]\()\S*" + originalFileName
                     );
 
-
+                    if (!oldInboundLinks.Success)
+                    {
+                        // this means likely we have reference links. booo:
+                        oldInboundLinks = Regex.Match(
+                            File.ReadAllText(repo.Info.WorkingDirectory + file.Path),
+                            @"(?<=\]:).+?" + originalFileName
+                        );
+                        if (!oldInboundLinks.Success)
+                        {
+                            continue;
+                        }
+                    }
                     var sourceAbsoluteDirectoryPath = (
                         Path.GetDirectoryName(repo.Info.WorkingDirectory + file.Path) + Path.DirectorySeparatorChar.ToString()).ToAbsoluteDirectoryPath();
                     var targetAbsoluteFilePath =
@@ -327,7 +344,15 @@ namespace CSITools
 
                     // for each link match, replace that with the new, relative link.
                     // BUG: if the file is the same name but in a different location, we need to do this only once for all things.
-                        string replaceText = File.ReadAllText(repo.Info.WorkingDirectory + file.Path).Replace(oldInboundLinks.Value, newInboundLink);
+                    string replaceText = "";
+                    try
+                    {
+                        replaceText = File.ReadAllText(repo.Info.WorkingDirectory + file.Path).Replace(oldInboundLinks.Value, newInboundLink);
+                    }
+                    catch ( Exception ex)
+                    {
+                        throw ex;
+                    }
                         File.WriteAllText(repo.Info.WorkingDirectory + file.Path, replaceText);
                         repo.Stage(file.Path);
                 }
@@ -476,8 +501,9 @@ namespace CSITools
 
                 // make sure you can find it
                 var mediaIndexEntry = from m in repo.Index
-                                      where m.Path.Contains(sourceMediaPath)
+                                      where m.Path.ToLower().Contains(sourceMediaPath.ToLower())
                                       select m;
+                int count = mediaIndexEntry.Count();
 
                 if (mediaIndexEntry.Count() != 1)
                 {
