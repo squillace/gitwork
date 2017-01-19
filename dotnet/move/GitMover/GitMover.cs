@@ -115,13 +115,22 @@ namespace CSITools
                 @"\[.+?\]\(.+?\)"
             );
 
+            // TODO: what if the links are specified as ref anchors? Then the above regex will not catch them, and they won't be fixed.
+            /*
+             * 
+             * Regex.Match(
+                            File.ReadAllText(repo.Info.WorkingDirectory + file.Path),
+                            @"(?<=\]:).+?" + originalFileName
+                        );
+
+            code for capturing ref anchors
+             * */
+
+
             StringCollection rewrittenLinks = new StringCollection();
 
             foreach (Match currentOutboundLink in outboundLinks)
             {
-                // TODO: turns out that I'll keep rewriting multiple links if I don't check first.
-                // check for link rewriting before you do anything at all
-            
 
                 string oldOutboundLink = (Regex.Match(currentOutboundLink.Value, @"(?<=\]\().+?(?=\))")).Value;
                 if (rewrittenLinks.Contains(oldOutboundLink))
@@ -183,6 +192,7 @@ namespace CSITools
                 // Required: must let the repo go find the target file. An exception will be thrown if it doesn't exist; 
                 // POSSIBLE BUG: once we allow files in the repo to be unique only within a directory, it's possible that this will not resolve with only one, 
                 // introducing a bug. Only way THEN will be to search for file AND subdirectory. Not doing that now.
+                // TODO:
                 var targetIndexEntryFromRepo = (from t in repo.Index where t.Path.Contains(targetFileName) select t).FirstOrDefault();
 
                 // Now we can construct the absolute path. Could have done this with strings, but.... 
@@ -216,7 +226,7 @@ namespace CSITools
         {
             if (redirects)
             {
-                string tempRedirectString = targetPattern.Replace(@"articles\", "").Replace(@"\", @"/");
+                string tempRedirectString = targetPattern.Replace(@"articles\", "").Replace(@"\", @"/").Replace(".md", "");
                 StreamWriter redirectFile = File.CreateText(repo.Info.WorkingDirectory + sourcePattern);
                 redirectFile.WriteLine("---");
                 redirectFile.WriteLine("redirect_url: /azure/" + tempRedirectString);
