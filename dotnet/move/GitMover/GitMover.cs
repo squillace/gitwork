@@ -37,7 +37,7 @@ namespace CSITools
         private string sourcePattern;
         private string targetPattern;
         private bool redirects;
-        private bool commit;
+        private bool @continue;
         Repository repo;
         private string originalFileContents;
 
@@ -58,7 +58,7 @@ namespace CSITools
         {
             this.repoWorkingRoot = repoRootDir;
             this.redirects = redirects;
-            this.commit = commit;
+            this.@continue = commit;
             this.sourcePattern = source.Replace(@"/", @"\");
             this.targetPattern = target.Replace(@"/", @"\");
             this.repo = new Repository(repoRootDir);
@@ -193,8 +193,11 @@ namespace CSITools
                 // POSSIBLE BUG: once we allow files in the repo to be unique only within a directory, it's possible that this will not resolve with only one, 
                 // introducing a bug. Only way THEN will be to search for file AND subdirectory. Not doing that now.
                 // TODO:
-                var targetIndexEntryFromRepo = (from t in repo.Index where t.Path.Contains(targetFileName) select t).FirstOrDefault();
-
+                var targetIndexEntryFromRepo = (from t in repo.Index where t.Path.ToLower().Contains(targetFileName.ToLower()) select t).FirstOrDefault();
+                if (targetIndexEntryFromRepo == null)
+                {
+                    throw new Exception(string.Format("Cannot find file {0}.", targetFileName.ToLower()));
+                }
                 // Now we can construct the absolute path. Could have done this with strings, but.... 
                 var targetAbsoluteOutboundLinkPath =
                     (Path.GetDirectoryName(repo.Info.WorkingDirectory + targetIndexEntryFromRepo.Path) + @"\" + targetFileName).ToAbsoluteFilePath();
@@ -208,7 +211,7 @@ namespace CSITools
                 }
 
                 string replacementHTML = (File.ReadAllText(repo.Info.WorkingDirectory + targetPattern))
-                    .Replace(oldOutboundLink, newTargetLink);
+                    .Replace(oldOutboundLink, newTargetLink.ToLower());
                 // go back to linux links:
                 //replacementHTML = replacementHTML.Replace(@"\", @"/");
                 File.WriteAllText(repo.Info.WorkingDirectory + targetPattern, replacementHTML);
@@ -513,11 +516,27 @@ namespace CSITools
                 var mediaIndexEntry = from m in repo.Index
                                       where m.Path.ToLower().Contains(sourceMediaPath.ToLower())
                                       select m;
-                int count = mediaIndexEntry.Count();
 
+                if (mediaIndexEntry.Count() == 0)
+                {
+                    if (this.@continue)
+                    {
+                        Console.WriteLine(string.Format("Can't find the media {0}; was it moved already? Check for the file in master.", sourceMediaPath));
+                        continue;
+                    }
+                    else
+                        throw new Exception(string.Format("Can't find the media {0}; was it moved already? Check for the file in master.", sourceMediaPath));
+                }
+    
                 if (mediaIndexEntry.Count() != 1)
                 {
-                    throw new Exception("Strange: " + sourceMediaPath + " has more than one entry.");
+                    if (this.@continue)
+                    {
+                        Console.WriteLine(string.Format("Media file {0} has more than one version. How's that possible?", sourceMediaPath));
+                        continue;
+                    }
+                    else
+                        throw new Exception(string.Format("Media file {0} has more than one version. How's that possible?", sourceMediaPath));
                 }
 
                 string realSourcePath = mediaIndexEntry.First().Path;

@@ -28,7 +28,7 @@ namespace links
     {
 
         private static bool redirects = false;
-        private static bool commit = false;
+        private static bool @continue = false;
 
         public static void Main(string[] args)
         {
@@ -51,7 +51,7 @@ namespace links
                     v => show_help = v != null
                 },
                 { "r|redirect", "Indicates that moved file should be replaced with a redirect file to the new target; default is true.", v => redirects = true  },
-                { "c|commit", "Indicates that all changes should be committed; default is to leave all changes **staged** (\"added\", in git terminology, but not committed) so that \"git diff --cached\" will immediately display the changes.", v => commit = true }
+                { "c|continue", "Indicates that should a non-fatal error occur, moving the file will still happen, and the error is reported for followup.", v => @continue = true }
             };
 
             List<string> argList;
@@ -74,14 +74,14 @@ namespace links
             GitMover mover = null;  
             try
             {
-                mover = new GitMover(workingRepoDir, argList[0], argList[1], redirects, commit);
+                mover = new GitMover(workingRepoDir, argList[0], argList[1], redirects, @continue);
                 mover.Move();
                 mover.Dispose();
             }
             catch (Exception ex)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Error: {0}: ", ex.Message);
+                Console.WriteLine("Error: {0} ", ex.Message);
                 Console.ResetColor();
                 ShowHelp(p);
                 if (mover != null)
