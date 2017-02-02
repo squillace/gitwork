@@ -8,14 +8,15 @@ function move_files(){
     read pattern
     #set -x
     # TODO: this doesn't work if you put it in "$pattern"
-    files=$(ls $SOURCE_DIR/$pattern)
+    files=$(find $SOURCE_DIR -type f -name $pattern)
     for file in $files
     do
-        echo "Source directory: $(find $(git rev-parse --show-toplevel) -type f -name .)/$SOURCE_DIR"
+        echo "Source directory: $(dirname $file)"
         echo "absolute file: $file"
-        echo "file itself: $(basename $file)"
-        echo "target URL should be :$(find $(git rev-parse --show-toplevel) -type f -name .)/$TARGET_DIR/$(basename $file)"
-        source ~/workspace/gitwork/bash/renamefile-general.sh $file $(find $(git rev-parse --show-toplevel) -type f -name .)/$TARGET_DIR/$(basename $file)
+        echo "file name itself: $(basename $file)"
+        echo "target URL should be :$TARGET_DIR$(basename $file)"
+        echo "command: $file $TARGET_DIR$(basename $file)"
+        ~/Documents/GitHub/gitwork/dotnet/move/move/bin/Debug/move.exe $file $TARGET_DIR$(basename $file)
     done
     #set +x
 }

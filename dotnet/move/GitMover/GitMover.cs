@@ -192,8 +192,22 @@ namespace CSITools
                 // Required: must let the repo go find the target file. An exception will be thrown if it doesn't exist; 
                 // POSSIBLE BUG: once we allow files in the repo to be unique only within a directory, it's possible that this will not resolve with only one, 
                 // introducing a bug. Only way THEN will be to search for file AND subdirectory. Not doing that now.
-                // TODO:
-                var targetIndexEntryFromRepo = (from t in repo.Index where t.Path.ToLower().Contains(targetFileName.ToLower()) select t).FirstOrDefault();
+                // NOTE: can't search for complete filename without stripping first any querystrings.
+                string targetFileNameNoQueryStrings = targetFileName;
+                if (targetFileName.IndexOf('?') != -1)
+                {
+                    targetFileNameNoQueryStrings = targetFileName.Remove(targetFileName.IndexOf('?'));
+                }
+                if (targetFileName.IndexOf('#') != -1)
+                {
+                    targetFileNameNoQueryStrings = targetFileName.Remove(targetFileName.IndexOf('#'));
+                }
+                if (!targetFileNameNoQueryStrings.Contains(".md")) // it's a link, but not to anything we care about
+                {
+                    continue;
+                }
+
+                var targetIndexEntryFromRepo = (from t in repo.Index where t.Path.ToLower().Contains(targetFileNameNoQueryStrings.ToLower()) select t).FirstOrDefault();
                 if (targetIndexEntryFromRepo == null)
                 {
                     throw new Exception(string.Format("Cannot find file {0}.", targetFileName.ToLower()));
@@ -377,6 +391,7 @@ namespace CSITools
         {
             // Why move does not create the directory, I have no idea. But it killed about two days figuring it out 
             // given that the error message is crazy bad.
+
             if (!Directory.Exists(Path.GetDirectoryName(repo.Info.WorkingDirectory + targetPattern)))
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(repo.Info.WorkingDirectory + targetPattern));
@@ -429,9 +444,10 @@ namespace CSITools
         /// <param name="mediaLinkMap"></param>
         private void RewriteInternalMediaLinks(Dictionary<string, string> mediaLinkMap)
         {
-            // find the new file and load it
-            // TODO: why doesn't this load? are the files NOT there? Do we need to fetch this from 
-            // the repo as a blob?
+
+            /*
+             * TODO: if there's an issue below with media files not being found, the links to them will not be rewritten
+             */
 
             string mediaDirectory =
                 @"media\"
