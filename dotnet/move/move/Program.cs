@@ -105,7 +105,7 @@ namespace links
             Console.WriteLine();
             Console.WriteLine("Example in CMD.EXE: ");
             Console.WriteLine();
-            Console.WriteLine("\t{0}> move.exe \"{1}\" \"{2}\"", @"C:\github\azure-docs-pr", @"file.md", @"directory\file.md");
+            Console.WriteLine("\t{0}> move.exe \"{1}\" \"{2}\"", @"C:\github\azure-docs-pr", @"articles\file.md", @"articles\directory\file.md");
             Console.WriteLine();
             Console.WriteLine ("Options:");
             p.WriteOptionDescriptions (Console.Out);
