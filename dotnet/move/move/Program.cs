@@ -51,7 +51,7 @@ namespace links
                     v => show_help = v != null
                 },
                 { "r|redirect", "Indicates that moved file should be replaced with a redirect file to the new target; default is true.", v => redirects = true  },
-                { "c|continue", "Indicates that should a non-fatal error occur, moving the file will still happen, and the error is reported for followup.", v => @continue = true }
+                { "c|continue", "Indicates that should a non-fatal error occur, as much work as is possible will complete and the error is reported for followup.", v => @continue = true }
             };
 
             List<string> argList;
@@ -100,8 +100,13 @@ namespace links
         {
             Console.WriteLine ("Usage: move <source filespec> <target filespec>");
             Console.WriteLine();
-            Console.WriteLine ("Move a single markdown file to the specified path, including media files, and rewrite all inbound links.");
-            Console.WriteLine ();
+            Console.WriteLine ("Where <source filespec> is the path from the root of a documentation directory, and <target filespec> is the same. Moves a single markdown file to the specified path, including media files, and rewrite all inbound links.");
+            Console.WriteLine ("NOTE: This program moves one file at a time.");
+            Console.WriteLine();
+            Console.WriteLine("Example in CMD.EXE: ");
+            Console.WriteLine();
+            Console.WriteLine("\t{0}> move.exe \"{1}\" \"{2}\"", @"C:\github\azure-docs-pr", @"file.md", @"directory\file.md");
+            Console.WriteLine();
             Console.WriteLine ("Options:");
             p.WriteOptionDescriptions (Console.Out);
         }
