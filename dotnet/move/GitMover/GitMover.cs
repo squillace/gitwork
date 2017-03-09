@@ -210,7 +210,12 @@ namespace CSITools
                 var targetIndexEntryFromRepo = (from t in repo.Index where t.Path.ToLower().Contains(targetFileNameNoQueryStrings.ToLower()) select t).FirstOrDefault();
                 if (targetIndexEntryFromRepo == null)
                 {
-                    throw new Exception(string.Format("Cannot find file {0}.", targetFileName.ToLower()));
+                    if (this.@continue)
+                    {
+                        Console.WriteLine(string.Format("Relinking file and cannot find linked file {0}.", targetFileName.ToLower()));
+                    }
+                    else
+                        throw new Exception(string.Format("Cannot find file {0}.", targetFileName.ToLower()));
                 }
                 // Now we can construct the absolute path. Could have done this with strings, but.... 
                 var targetAbsoluteOutboundLinkPath =
@@ -319,9 +324,6 @@ namespace CSITools
 
             var repoFiles = from i in repo.Index
                             where i.Path.Contains(".md")
-                            && (i.Path.Contains("articles")
-                            || i.Path.Contains("includes"))
-
                             select i;
 
             Regex justFilePattern = new Regex(originalFileName);

@@ -32,8 +32,6 @@ namespace links
 
         public static void Main(string[] args)
         {
-            string sourcePattern = "";
-            string targetPattern = "";
             string workingRepoDir = Directory.GetCurrentDirectory() + @"\";
             bool show_help = false;
 
@@ -50,8 +48,8 @@ namespace links
                     "Displays this help for \"move\"",
                     v => show_help = v != null
                 },
-                { "r|redirect", "Indicates that moved file should be replaced with a redirect file to the new target; default is true.", v => redirects = true  },
-                { "c|continue", "Indicates that should a non-fatal error occur, as much work as is possible will complete and the error is reported for followup.", v => @continue = true }
+                { "r|redirect", "Indicates that moved file should be replaced with a redirect file to the new target; default is false.", v => redirects = true  },
+                { "c|continue", "Indicates that should a non-fatal error occur, as much work as is possible will complete and the error is reported for followup. Default is false.", v => @continue = true }
             };
 
             List<string> argList;
