@@ -12,18 +12,17 @@ function move_files(){
     read replacementScheme
     #set -x
     # TODO: this doesn't work if you put it in "$pattern"
-    files=$(find $SOURCE_DIR -type f -name $pattern)
+    files=$(ls $SOURCE_DIR/$pattern)
     for file in $files
     do
         echo "Source directory: $(dirname $file)"
 #        echo "echo REPLACEMENT: sed \"$targetscheme\" and \"$replacementScheme\"
-        
-        echo "$($(basename $file) | sed 's/$targetscheme/$replacementScheme/g')"
+        newFileName=$(basename ${file/$targetscheme/$replacementScheme})
         echo "absolute file: $file"
-        echo "file name itself: $(basename $file)"
-        echo "target URL should be :$TARGET_DIR$(basename $file)"
-        echo "command: $file $TARGET_DIR$(basename $file)"
-        #~/Documents/GitHub/gitwork/dotnet/move/move/bin/Debug/move.exe $file $TARGET_DIR$(basename $file)
+        echo "file name itself: $newFileName"
+        echo "target URL should be :$TARGET_DIR/$newFileName"
+        echo "command: $file $TARGET_DIR/$newFileName"
+        ~/Documents/GitHub/gitwork/dotnet/move/move/bin/Debug/move.exe -c -r $file $TARGET_DIR/$newFileName
     done
     #set +x
 }

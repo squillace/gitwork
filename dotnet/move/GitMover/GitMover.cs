@@ -72,6 +72,12 @@ namespace CSITools
             {
                 throw new Exception("The source file cannot be found: " + sourcePattern);
             }
+            if (Regex.IsMatch(File.ReadAllText(Path.Combine(repo.Info.WorkingDirectory + sourcePattern)), "redirect_url:"))
+            {
+                // redirect file: we're not moving it.
+                throw new Exception(String.Format("The file {0} is a redirect file; skipping.", sourcePattern));
+                
+            }
         }
 
         public void Move()
@@ -109,10 +115,12 @@ namespace CSITools
         {
 
             // for each outbound target file referenced, grab precisely the link from the file and replace it with the new link
-
+           
             var outboundLinks = Regex.Matches(
                 File.ReadAllText(repo.Info.WorkingDirectory + targetPattern),
-                @"\[.+?\]\(.+?\)"
+                @"(?<=\]):{0,1}.+?.md"
+            // above is the newline:
+            // @"\[.+?\]\(.+?\)"
             );
 
             // TODO: what if the links are specified as ref anchors? Then the above regex will not catch them, and they won't be fixed.
@@ -124,6 +132,12 @@ namespace CSITools
                         );
 
             code for capturing ref anchors
+
+            (?<=\]:).+?.md
+
+            then, strip off the filename with Path.GetFilename and search for that.
+
+            capture all links: (?<=\]):{0,1}.+?.md leaving online : or ( in front, so strip that out and continue normally.
              * */
 
 
@@ -131,8 +145,16 @@ namespace CSITools
 
             foreach (Match currentOutboundLink in outboundLinks)
             {
-
-                string oldOutboundLink = (Regex.Match(currentOutboundLink.Value, @"(?<=\]\().+?(?=\))")).Value;
+                if (currentOutboundLink.Value.Contains("cli-install-nodejs.md"))
+                {
+                    ;
+                }
+                // old regex: "(?<=\]\().+?(?=\))" ==> current regex also catches reference anchors.
+                string oldOutboundLink = (Regex.Match(currentOutboundLink.Value, @"(?<=[:\(]).*")).Value;
+                if (oldOutboundLink.StartsWith(":") || oldOutboundLink.StartsWith("("))
+                {
+                    throw new Exception("well, THAT didn't work, now, did it?");
+                }
                 if (rewrittenLinks.Contains(oldOutboundLink))
                 {
                     continue;
@@ -165,9 +187,27 @@ namespace CSITools
                  * */
                 // strip any filename out of the entire link.
 
-                if (oldOutboundLink.IndexOf(' ') != -1)
+                // first, capture the querystring, if any
+                string queryString = string.Empty;
+                if (oldOutboundLink.Contains("?"))
                 {
-                    oldOutboundLink = oldOutboundLink.Remove(oldOutboundLink.IndexOf(' '));
+                    queryString = oldOutboundLink.Substring(oldOutboundLink.IndexOf("?"));
+                }
+                
+
+                // second, handle the removal of extraneous markdown goo
+                oldOutboundLink = CleanURL(oldOutboundLink);
+
+                // Ignore some links
+                
+                if (oldOutboundLink.StartsWith("http")) // link is internal to an H2; no file to rewrite; or external
+                {
+
+                    continue;
+                }
+                if (!oldOutboundLink.Contains(".md")) // it's a link, but not to anything we care about
+                {
+                    continue;
                 }
 
                 string targetFileName = "";
@@ -179,40 +219,114 @@ namespace CSITools
                 {
                     throw ex;
                 }
-                if (targetFileName.StartsWith(@"#") || oldOutboundLink.StartsWith("http")) // link is internal to an H2; no file to rewrite; or external
+
+
+                // handle the case where someone specified the "this" file name
+                if (targetFileName.Equals(Path.GetFileName(sourcePattern)))
                 {
-                    continue;
+                    targetFileName = Path.GetFileName(targetPattern);
+                    targetFileName = CleanURL(targetFileName);
+                    oldOutboundLink = oldOutboundLink.Replace(Path.GetFileName(sourcePattern), targetFileName);
                 }
-
-
-
+                
                 var sourceAbsoluteDirectoryPath 
                     = (Path.GetDirectoryName(repo.Info.WorkingDirectory + targetPattern) + Path.DirectorySeparatorChar.ToString()).ToAbsoluteDirectoryPath();
+                
+                // TODO: need to search for all files to find the one that matches exactly, rather than assume the first one is correct.
+                /*
+                 * first, take the link and see if it exists in the file system. If it does, don't go looking any further and use that value.
+                 * if it does not exist in the system, THEN go looking for PRECISELY the filename, and take a guess. There could be sixteen 
+                 * "add-disk.md" files, and no way to decide if the original link was incorrect, so just take the first one and go.
+                 * IN ADDITION: found file must NOT be a redirect file, which is an easy way of making a mistake.
+                 */
+                IndexEntry targetIndexEntryFromRepo;
 
-                // Required: must let the repo go find the target file. An exception will be thrown if it doesn't exist; 
-                // POSSIBLE BUG: once we allow files in the repo to be unique only within a directory, it's possible that this will not resolve with only one, 
-                // introducing a bug. Only way THEN will be to search for file AND subdirectory. Not doing that now.
-                // NOTE: can't search for complete filename without stripping first any querystrings.
-                string targetFileNameNoQueryStrings = targetFileName;
-                if (targetFileName.IndexOf('?') != -1)
-                {
-                    targetFileNameNoQueryStrings = targetFileName.Remove(targetFileName.IndexOf('?'));
-                }
-                if (targetFileName.IndexOf('#') != -1)
-                {
-                    targetFileNameNoQueryStrings = targetFileName.Remove(targetFileName.IndexOf('#'));
-                }
-                if (!targetFileNameNoQueryStrings.Contains(".md")) // it's a link, but not to anything we care about
-                {
-                    continue;
-                }
+                // if the file can be found on the file system and is NOT a redirect file, use that.
 
-                var targetIndexEntryFromRepo = (from t in repo.Index where t.Path.ToLower().Contains(targetFileNameNoQueryStrings.ToLower()) select t).FirstOrDefault();
+                // OK: a. Find out if there's more than one file.
+                // b. if there's two files, choose the one that is not a redirect file.
+                // c. if there's more, check the -c value and either throw or write to console. You can't guess.
+                /*
+                var repoFileHits = from t in repo.Index where t.Path.ToLower().Contains(targetFileName.ToLower()) select t;
+
+                if (repoFileHits.Count() == 1)
+                {
+                    // this is assumed to be the file. 
+                    // detect redirect and retarget using THAT file name to scuttle the redirect.
+                }
+                else if (repoFileHits.Count() == 2)
+                {
+                    // one of these is likely a redirect. if so, use the other one.
+                }
+                else if (repoFileHits.Count() > 2)
+                {
+                    // just take the first one if you can; but in all cases write out the situation and say you're going to guess
+                    // throw an exception if -c is not specified, otherwise continue.
+                }
+                */
+
+                // TODO: Here the problem is that if the targetfilename has been reset to the new name (in a recursivelink)
+                // you're trying to find that file with the previous file name, which sets you on the wrong path. :-|
+                // above, you should IF it's a recursive link, just reset oldOutboundLink to "this file" target pattern, I think.
+            
+                if (File.Exists(Path.Combine(sourceAbsoluteDirectoryPath.ToString(), oldOutboundLink)))
+                {
+
+                    if (Regex.IsMatch(File.ReadAllText(Path.Combine(sourceAbsoluteDirectoryPath.ToString(), oldOutboundLink)), "redirect_url:"))
+                    {
+                        // here extract and use the redirect value
+                        string redirectlink = Regex.Match(currentOutboundLink.Value, @"(?<=redirect_url: /azure/).+?").Value;
+                        targetIndexEntryFromRepo =
+                            (from t in repo.Index where t.Path.ToLower().Contains(redirectlink.ToLower()) select t)
+                            .FirstOrDefault();
+                    }
+                    else
+                        targetIndexEntryFromRepo = 
+                            (from t in repo.Index where t.Path.ToLower().Contains(targetFileName.ToLower()) select t)
+                            .FirstOrDefault();
+                }
+                else // if the file IS either a redirect file OR the full path can't be found, search by file NAME and then retest for redirection.
+                {
+                    // Console.WriteLine("Cannot locate the outbound target \"{0}\" as a file; trying the filename in the repo.", oldOutboundLink);
+                    var tempRepoHits =
+                        (from t in repo.Index where t.Path.ToLower().Contains(@"\" + targetFileName.ToLower()) select t);
+                    if (tempRepoHits != null && tempRepoHits.Count() == 1)
+                    {
+                        targetIndexEntryFromRepo = tempRepoHits.First();
+                    }
+                    // what if it's tWO? Gotta find the one that is NOT a redirect
+                    else if (tempRepoHits != null && tempRepoHits.Count() == 2)
+                    {
+                        if (Regex.IsMatch(File.ReadAllText(repo.Info.WorkingDirectory + tempRepoHits.First().Path), "redirect_url:"))
+                        {
+
+                            // here extract and use the redirect value
+                            string redirectlink = Regex.Match(File.ReadAllText(repo.Info.WorkingDirectory + tempRepoHits.First().Path), @"(?<=redirect_url: /azure/).*").Value;
+                            if (redirectlink.EndsWith("\r"))
+                            {
+                                redirectlink = redirectlink.Remove(redirectlink.Length - 1);
+                            }
+                            redirectlink = redirectlink.Replace(@"/", @"\"); // on Windows, repo responds with windows separators.
+                            targetIndexEntryFromRepo =
+                                (from t in repo.Index where t.Path.ToLower().Contains(redirectlink.ToLower() + ".md") select t)
+                                .FirstOrDefault();
+                        }
+                        else
+                        {
+                            //take the other one
+                            targetIndexEntryFromRepo = tempRepoHits.ElementAt(1);
+                        }
+                    }
+                    else // hey, just can't have confidence we know which one it might be.
+                        targetIndexEntryFromRepo = null;
+                }
+            
                 if (targetIndexEntryFromRepo == null)
                 {
                     if (this.@continue)
                     {
-                        Console.WriteLine(string.Format("Relinking file and cannot find linked file {0}.", targetFileName.ToLower()));
+                        Console.WriteLine(string.Format("Relinking file and cannot find linked file {0} or there are more than two possibilities.", targetFileName.ToLower()));
+                        continue;
                     }
                     else
                         throw new Exception(string.Format("Cannot find file {0}.", targetFileName.ToLower()));
@@ -238,6 +352,28 @@ namespace CSITools
             }
         }
 
+        // removes everything from the end of a file link
+        private string CleanURL(string oldOutboundLink)
+        {
+            if (oldOutboundLink.IndexOf(' ') != -1)
+            {
+                oldOutboundLink = oldOutboundLink.Remove(oldOutboundLink.IndexOf(' '));
+            }
+            if (oldOutboundLink.IndexOf('?') != -1)
+            {
+                oldOutboundLink = oldOutboundLink.Remove(oldOutboundLink.IndexOf('?'));
+            }
+            if (oldOutboundLink.IndexOf('#') != -1)
+            {
+                oldOutboundLink = oldOutboundLink.Remove(oldOutboundLink.IndexOf('#'));
+            }
+            if (oldOutboundLink.StartsWith(@"./"))
+            {
+                oldOutboundLink = oldOutboundLink.Remove(0, 2);
+            }
+            return oldOutboundLink;
+        }
+
         private void CommitChanges()
         {
             // Signature signer = new Signature();
@@ -252,6 +388,7 @@ namespace CSITools
                 StreamWriter redirectFile = File.CreateText(repo.Info.WorkingDirectory + sourcePattern);
                 redirectFile.WriteLine("---");
                 redirectFile.WriteLine("redirect_url: /azure/" + tempRedirectString);
+                redirectFile.WriteLine("redirect_document_id: true");
                 redirectFile.WriteLine("---");
                 redirectFile.Close();
 
@@ -458,6 +595,16 @@ namespace CSITools
 
             // for each media file referenced, grab precisely the link from the file and replace it with the new link
             // in the form: media\<new markdown file name>\<same media file name>
+
+            // logging elaboration: 
+            /* 
+             * Case: another file shares media files. 
+             * Fix: search for the original media file FIRST, and if you don't find it, then search for the new media file. 
+             * If you can find THAT one, use THAT link, not the original link.
+             * 
+             */
+
+
 
             var imagelinks = Regex.Matches(
                 File.ReadAllText(repo.Info.WorkingDirectory + sourcePattern),

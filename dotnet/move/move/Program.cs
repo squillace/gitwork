@@ -56,6 +56,7 @@ namespace links
 
             try {
                 argList = p.Parse (args);
+                Console.WriteLine(args);
             }
             catch (OptionException e) {
                 Console.Write ("move: ");
@@ -81,7 +82,7 @@ namespace links
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Error: {0} ", ex.Message);
                 Console.ResetColor();
-                ShowHelp(p);
+                //ShowHelp(p);
                 if (mover != null)
                 {
                     mover.Unwind();
@@ -89,7 +90,7 @@ namespace links
                 }
             }
             Console.WriteLine("done");
-            //Console.ReadLine();
+            // Console.ReadLine();
 
 
         }
