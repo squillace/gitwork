@@ -18,10 +18,10 @@ fi
 
 for key_file in $(az keyvault secret list --vault-name $vault --query "[].id" -o tsv | sed "s/.*\///g")
    do
-        written_key_file=$key_file
+        written_key_file=${key_file//-/_}
         echo $written_key_file
         if  [[ $written_key_file =~ .*pub ]]; then
-            written_key_file=${written_key_file//-pub/.pub}
+            written_key_file=${written_key_file//_pub/.pub}
             echo "we have a pub file, so we'll put it at $path/demo/$written_key_file"
         fi
         az keyvault secret download --name $key_file --vault-name $vault --file $path/demo/$written_key_file
