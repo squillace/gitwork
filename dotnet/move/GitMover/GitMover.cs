@@ -40,8 +40,11 @@ namespace CSITools
         private bool @continue;
         Repository repo;
         private string originalFileContents;
-
+        
         public string repoWorkingRoot { get; private set; }
+
+        string gitUserName = "";
+        string gitUserEmail = "";
 
         private GitMover() { }
 
@@ -65,7 +68,20 @@ namespace CSITools
             var temp = new FileInfo(repoRootDir + sourcePattern);
             this.originalFileContents = temp.OpenText().ReadToEnd();
 
+            // Get the user settings from git config. This is necessary for
+            // creating a Signature for commits, so if this fails, we bail.
+            try
+            {
+                this.gitUserName = repo.Config.Get<string>("user.name").Value;
+                this.gitUserEmail = repo.Config.Get<string>("user.email").Value;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Failed to retrieve Git username and email address from git config. You must set your username and email via \"git config --global user.name\" and user.email before running this tool.");
+                Console.WriteLine("Exception message:\n" + ex.Message);
+            }
         }
+
         private void ValidateSource()
         {
             if (!File.Exists(repo.Info.WorkingDirectory + sourcePattern))
@@ -76,7 +92,7 @@ namespace CSITools
             {
                 // redirect file: we're not moving it.
                 throw new Exception(String.Format("The file {0} is a redirect file; skipping.", sourcePattern));
-                
+
             }
         }
 
@@ -115,7 +131,7 @@ namespace CSITools
         {
 
             // for each outbound target file referenced, grab precisely the link from the file and replace it with the new link
-           
+
             var outboundLinks = Regex.Matches(
                 File.ReadAllText(repo.Info.WorkingDirectory + targetPattern),
                 @"(?<=\]):{0,1}.+?.md"
@@ -193,13 +209,13 @@ namespace CSITools
                 {
                     queryString = oldOutboundLink.Substring(oldOutboundLink.IndexOf("?"));
                 }
-                
+
 
                 // second, handle the removal of extraneous markdown goo
                 oldOutboundLink = CleanURL(oldOutboundLink);
 
                 // Ignore some links
-                
+
                 if (oldOutboundLink.StartsWith("http")) // link is internal to an H2; no file to rewrite; or external
                 {
 
@@ -213,7 +229,7 @@ namespace CSITools
                 string targetFileName = "";
                 try
                 {
-                   targetFileName = Path.GetFileName(oldOutboundLink);
+                    targetFileName = Path.GetFileName(oldOutboundLink);
                 }
                 catch (Exception ex)
                 {
@@ -228,10 +244,10 @@ namespace CSITools
                     targetFileName = CleanURL(targetFileName);
                     oldOutboundLink = oldOutboundLink.Replace(Path.GetFileName(sourcePattern), targetFileName);
                 }
-                
-                var sourceAbsoluteDirectoryPath 
+
+                var sourceAbsoluteDirectoryPath
                     = (Path.GetDirectoryName(repo.Info.WorkingDirectory + targetPattern) + Path.DirectorySeparatorChar.ToString()).ToAbsoluteDirectoryPath();
-                
+
                 // TODO: need to search for all files to find the one that matches exactly, rather than assume the first one is correct.
                 /*
                  * first, take the link and see if it exists in the file system. If it does, don't go looking any further and use that value.
@@ -268,7 +284,7 @@ namespace CSITools
                 // TODO: Here the problem is that if the targetfilename has been reset to the new name (in a recursivelink)
                 // you're trying to find that file with the previous file name, which sets you on the wrong path. :-|
                 // above, you should IF it's a recursive link, just reset oldOutboundLink to "this file" target pattern, I think.
-            
+
                 if (File.Exists(Path.Combine(sourceAbsoluteDirectoryPath.ToString(), oldOutboundLink)))
                 {
 
@@ -281,7 +297,7 @@ namespace CSITools
                             .FirstOrDefault();
                     }
                     else
-                        targetIndexEntryFromRepo = 
+                        targetIndexEntryFromRepo =
                             (from t in repo.Index where t.Path.ToLower().Contains(targetFileName.ToLower()) select t)
                             .FirstOrDefault();
                 }
@@ -320,7 +336,7 @@ namespace CSITools
                     else // hey, just can't have confidence we know which one it might be.
                         targetIndexEntryFromRepo = null;
                 }
-            
+
                 if (targetIndexEntryFromRepo == null)
                 {
                     if (this.@continue)
@@ -334,7 +350,7 @@ namespace CSITools
                 // Now we can construct the absolute path. Could have done this with strings, but.... 
                 var targetAbsoluteOutboundLinkPath =
                     (Path.GetDirectoryName(repo.Info.WorkingDirectory + targetIndexEntryFromRepo.Path) + @"\" + targetFileName).ToAbsoluteFilePath();
-                 
+
                 //    var relativeFilePath2 = absoluteFilePath2.GetRelativePathFrom(absoluteDirectoryPath);
                 var test = targetAbsoluteOutboundLinkPath.GetRelativePathFrom(sourceAbsoluteDirectoryPath);
                 string newTargetLink = test.ToString().Replace(@"\", @"/");
@@ -376,8 +392,9 @@ namespace CSITools
 
         private void CommitChanges()
         {
-            // Signature signer = new Signature();
-            repo.Commit("Moved " + sourcePattern + " to " + targetPattern);
+            string commitMessage = "Moved " + sourcePattern + " to " + targetPattern;
+            Signature sig = GetGitSignature();
+            repo.Commit(commitMessage, sig, sig);
         }
 
         private void WriteRedirectFile()
@@ -393,7 +410,7 @@ namespace CSITools
                 redirectFile.Close();
 
                 repo.Stage(repo.Info.WorkingDirectory + sourcePattern);
-                
+
             }
         }
 
@@ -423,12 +440,12 @@ namespace CSITools
                 // and returns the relative path from the latter to the former.
                 string linkFileName = Path.GetFileName(oldIncludeRelativeLink);
                 var includeFile = (from i in repo.Index
-                                  where
-                                  (
-                                  i.Path.Contains(@"includes\")
-                                  && i.Path.EndsWith(linkFileName)
-                                  )
-                                  select i).FirstOrDefault();
+                                   where
+                                   (
+                                   i.Path.Contains(@"includes\")
+                                   && i.Path.EndsWith(linkFileName)
+                                   )
+                                   select i).FirstOrDefault();
 
                 var fromAbsoluteDirectoryPath = (newFileDirectoryPath + Path.DirectorySeparatorChar.ToString()).ToAbsoluteDirectoryPath();
                 var targetIncludeAbsoluteFilePath =
@@ -445,7 +462,7 @@ namespace CSITools
                     .Replace(oldIncludeRelativeLink, newIncludeRelativeLink);
                 // go back to linux links:
                 // replacementHTML = replacementHTML.Replace(@"\", @"/");
-                
+
                 File.WriteAllText(repo.Info.WorkingDirectory + sourcePattern, replacementHTML);
             }
 
@@ -453,7 +470,7 @@ namespace CSITools
 
         private void RewriteInboundLinks()
         {
-            
+
             string originalDirName = Path.GetDirectoryName(repo.Info.WorkingDirectory + sourcePattern);
             string originalFileName = Path.GetFileName(sourcePattern);
             string targetDirName = Path.GetDirectoryName(repo.Info.WorkingDirectory + targetPattern);
@@ -515,16 +532,15 @@ namespace CSITools
                     {
                         replaceText = File.ReadAllText(repo.Info.WorkingDirectory + file.Path).Replace(oldInboundLinks.Value, newInboundLink);
                     }
-                    catch ( Exception ex)
+                    catch (Exception ex)
                     {
                         throw ex;
                     }
-                        File.WriteAllText(repo.Info.WorkingDirectory + file.Path, replaceText);
-                        repo.Stage(file.Path);
+                    File.WriteAllText(repo.Info.WorkingDirectory + file.Path, replaceText);
+                    repo.Stage(file.Path);
                 }
-             }
+            }
         }
-
 
         private void MoveFile()
         {
@@ -547,13 +563,13 @@ namespace CSITools
             // Move them
             foreach (KeyValuePair<string, string> mediaFileEntry in mediaLinkMap)
             {
-                string oldPath = mediaFileEntry.Key.ToString(); 
-                string newPath = mediaFileEntry.Value.ToString().ToLower(); 
+                string oldPath = mediaFileEntry.Key.ToString();
+                string newPath = mediaFileEntry.Value.ToString().ToLower();
 
                 // make sure the moving directory exists, or EVERYTHING WILL FAIL.
                 if (!Directory.Exists(Path.GetDirectoryName(newPath)))
                 {
-                    Directory.CreateDirectory(Path.GetDirectoryName(newPath));
+                    Directory.CreateDirectory(Path.GetDirectoryName(repo.Info.WorkingDirectory + newPath));
                 }
 
                 if (File.Exists(repo.Info.WorkingDirectory + oldPath) && Directory.Exists(Path.GetDirectoryName(newPath)))
@@ -570,7 +586,7 @@ namespace CSITools
             }
 
             // now commit so we can continue working with them.
-            Signature author = new Signature("squillace", "ralph@squillace.com", DateTime.Now);
+            Signature author = GetGitSignature();
 
             // repo.Commit("Files moved; rewriting internal and external links.", author, author);
             RewriteInternalMediaLinks(mediaLinkMap);
@@ -627,7 +643,7 @@ namespace CSITools
                 string newMediaLink = test.ToString().Replace(@"\", @"/");
                 if (newMediaLink.StartsWith(@".\"))
                 {
-                    newMediaLink = newMediaLink.Remove(0,2);
+                    newMediaLink = newMediaLink.Remove(0, 2);
                 }
 
                 string replacementHTML = (File.ReadAllText(repo.Info.WorkingDirectory + sourcePattern))
@@ -659,7 +675,7 @@ namespace CSITools
                 */
 
             var imagelinks = Regex.Matches(
-                File.ReadAllText(repo.Info.WorkingDirectory + sourcePattern), 
+                File.ReadAllText(repo.Info.WorkingDirectory + sourcePattern),
                 @"(?<=\!)\[.+?\]\(.+?\)"
             );
 
@@ -692,7 +708,7 @@ namespace CSITools
                     else
                         throw new Exception(string.Format("Can't find the media {0}; was it moved already? Check for the file in master.", sourceMediaPath));
                 }
-    
+
                 if (mediaIndexEntry.Count() != 1)
                 {
                     if (this.@continue)
@@ -727,7 +743,7 @@ namespace CSITools
         /// would be "media\</param>
         /// <param name="fromFolder">the absolute path to a source directory.</param>
         /// <returns></returns>
-      
+
         public void Unwind()
         {
             // Force reset the branch to what it was.
@@ -739,5 +755,15 @@ namespace CSITools
         {
             repo.Dispose();
         }
+
+        /// <summary>
+        /// Gets a signature appropriate for passing to the <see cref="Repository.Commit"/> method.
+        /// </summary>
+        /// <returns>A <see cref="Signature"/> with the current git user's username, email, and initialized with the current timestamp.</returns>
+        private Signature GetGitSignature()
+        {
+            return new Signature(this.gitUserName, this.gitUserEmail, DateTimeOffset.Now);
+        }
+
     }
 }
