@@ -38,6 +38,8 @@ namespace links
                     if (options.ShowHelp)
                     {
                         Console.WriteLine(CommandLine.Text.HelpText.AutoBuild(options));
+                        //Exit the app without doing anything
+                        return;
                     }
 
                     if (String.IsNullOrEmpty(options.RepoDir))
@@ -49,6 +51,11 @@ namespace links
                     {
                         repoDir = options.RepoDir + @"\";
                     }
+                }
+                else
+                {
+                    Console.WriteLine("Command line arguments not parsed successfully. Raw args were:");
+                    Console.WriteLine(String.Join(" | ", args));
                 }
             }
             catch (Exception e)

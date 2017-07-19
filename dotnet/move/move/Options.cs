@@ -13,10 +13,10 @@ namespace links
         [Option('r', "repo-directory", HelpText = "Specifies the root directory of the repo to use; default is current directory.", Required = false, DefaultValue = "")]
         public string RepoDir { get; set; }
 
-        [Option('s', "source", HelpText = "Specifies the root directory of the repo to use; default is current directory.", Required = true, DefaultValue = "")]
+        [Option('s', "source", HelpText = "Specifies the root directory of the repo to use; default is current directory.", Required = false, DefaultValue = "")]
         public string Source { get; set; }
 
-        [Option('d', "destination", HelpText = "Specifies the root directory of the repo to use; default is current directory.", Required = true, DefaultValue = "")]
+        [Option('d', "destination", HelpText = "Specifies the root directory of the repo to use; default is current directory.", Required = false, DefaultValue = "")]
         public string Destination { get; set; }
 
         [Option('h', "help", HelpText = "Displays this help for \"move\".", Required = false, DefaultValue = false)]

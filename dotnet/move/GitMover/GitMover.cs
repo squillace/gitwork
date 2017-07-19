@@ -565,14 +565,15 @@ namespace CSITools
             {
                 string oldPath = mediaFileEntry.Key.ToString();
                 string newPath = mediaFileEntry.Value.ToString().ToLower();
+                string newMediaDir = Path.GetDirectoryName(repo.Info.WorkingDirectory + newPath);
 
                 // make sure the moving directory exists, or EVERYTHING WILL FAIL.
-                if (!Directory.Exists(Path.GetDirectoryName(newPath)))
+                if (!Directory.Exists(newMediaDir))
                 {
-                    Directory.CreateDirectory(Path.GetDirectoryName(repo.Info.WorkingDirectory + newPath));
+                    Directory.CreateDirectory(newMediaDir);
                 }
 
-                if (File.Exists(repo.Info.WorkingDirectory + oldPath) && Directory.Exists(Path.GetDirectoryName(newPath)))
+                if (File.Exists(repo.Info.WorkingDirectory + oldPath) && Directory.Exists(newMediaDir))
                 {
                     try
                     {
