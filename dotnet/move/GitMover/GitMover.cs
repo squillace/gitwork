@@ -65,8 +65,7 @@ namespace CSITools
             this.sourcePattern = source.Replace(@"/", @"\");
             this.targetPattern = target.Replace(@"/", @"\");
             this.repo = new Repository(repoRootDir);
-            var temp = new FileInfo(repoRootDir + sourcePattern);
-            this.originalFileContents = temp.OpenText().ReadToEnd();
+            this.originalFileContents = File.ReadAllText(repoRootDir + sourcePattern);
 
             // Get the user settings from git config. This is necessary for
             // creating a Signature for commits, so if this fails, we bail.
@@ -82,17 +81,22 @@ namespace CSITools
             }
         }
 
+        /// <summary>
+        /// Ensures the file to move exists on the file system and that it isn't a redirect file.
+        /// </summary>
         private void ValidateSource()
         {
+            // File exist check
             if (!File.Exists(repo.Info.WorkingDirectory + sourcePattern))
             {
-                throw new Exception("The source file cannot be found: " + sourcePattern);
+                throw new FileNotFoundException("The source file cannot be found: " + sourcePattern);
             }
+
+            // Redirect file check
             if (Regex.IsMatch(File.ReadAllText(Path.Combine(repo.Info.WorkingDirectory + sourcePattern)), "redirect_url:"))
             {
                 // redirect file: we're not moving it.
-                throw new Exception(String.Format("The file {0} is a redirect file; skipping.", sourcePattern));
-
+                throw new Exception($"The file {sourcePattern} is a redirect file; skipping.");
             }
         }
 
@@ -303,7 +307,7 @@ namespace CSITools
                 }
                 else // if the file IS either a redirect file OR the full path can't be found, search by file NAME and then retest for redirection.
                 {
-                    // Console.WriteLine("Cannot locate the outbound target \"{0}\" as a file; trying the filename in the repo.", oldOutboundLink);
+                    // Console.WriteLine($"Cannot locate the outbound target \"{oldOutboundLink}\" as a file; trying the filename in the repo.");
                     var tempRepoHits =
                         (from t in repo.Index where t.Path.ToLower().Contains(@"\" + targetFileName.ToLower()) select t);
                     if (tempRepoHits != null && tempRepoHits.Count() == 1)
@@ -341,11 +345,11 @@ namespace CSITools
                 {
                     if (this.@continue)
                     {
-                        Console.WriteLine(string.Format("Relinking file and cannot find linked file {0} or there are more than two possibilities.", targetFileName.ToLower()));
+                        Console.WriteLine($"Relinking file and cannot find linked file {targetFileName.ToLower()} or there are more than two possibilities.");
                         continue;
                     }
                     else
-                        throw new Exception(string.Format("Cannot find file {0}.", targetFileName.ToLower()));
+                        throw new Exception($"Cannot find file {targetFileName.ToLower()}.");
                 }
                 // Now we can construct the absolute path. Could have done this with strings, but.... 
                 var targetAbsoluteOutboundLinkPath =
@@ -484,11 +488,6 @@ namespace CSITools
 
             foreach (IndexEntry file in repoFiles)
             {
-                // test for debugging
-                if (file.Path.Contains("apis-list.md"))
-                {
-                    ;
-                }
                 //  if it has a match: focus!
                 if (justFilePattern.IsMatch(File.ReadAllText(repo.Info.WorkingDirectory + file.Path)))
                 {
@@ -536,7 +535,9 @@ namespace CSITools
                     {
                         throw ex;
                     }
+
                     File.WriteAllText(repo.Info.WorkingDirectory + file.Path, replaceText);
+
                     repo.Stage(file.Path);
                 }
             }
@@ -703,22 +704,22 @@ namespace CSITools
                 {
                     if (this.@continue)
                     {
-                        Console.WriteLine(string.Format("Can't find the media {0}; was it moved already? Check for the file in master.", sourceMediaPath));
+                        Console.WriteLine($"Can't find the media {sourceMediaPath}; was it moved already? Check for the file in master.");
                         continue;
                     }
                     else
-                        throw new Exception(string.Format("Can't find the media {0}; was it moved already? Check for the file in master.", sourceMediaPath));
+                        throw new Exception($"Can't find the media {sourceMediaPath}; was it moved already? Check for the file in master.");
                 }
 
                 if (mediaIndexEntry.Count() != 1)
                 {
                     if (this.@continue)
                     {
-                        Console.WriteLine(string.Format("Media file {0} has more than one version. How's that possible?", sourceMediaPath));
+                        Console.WriteLine($"Media file {sourceMediaPath} has more than one version. How's that possible?");
                         continue;
                     }
                     else
-                        throw new Exception(string.Format("Media file {0} has more than one version. How's that possible?", sourceMediaPath));
+                        throw new Exception($"Media file {sourceMediaPath} has more than one version. How's that possible?");
                 }
 
                 string realSourcePath = mediaIndexEntry.First().Path;
