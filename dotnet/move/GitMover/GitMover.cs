@@ -40,7 +40,7 @@ namespace CSITools
         private bool @continue;
         Repository repo;
         private string originalFileContents;
-        
+
         public string repoWorkingRoot { get; private set; }
 
         string gitUserName = "";
@@ -372,7 +372,11 @@ namespace CSITools
             }
         }
 
-        // removes everything from the end of a file link
+        /// <summary>
+        /// Removes everything from the end of a file link
+        /// </summary>
+        /// <param name="oldOutboundLink"></param>
+        /// <returns></returns>
         private string CleanURL(string oldOutboundLink)
         {
             if (oldOutboundLink.IndexOf(' ') != -1)
@@ -488,12 +492,14 @@ namespace CSITools
 
             foreach (IndexEntry file in repoFiles)
             {
+                string fileContent = File.ReadAllText(repo.Info.WorkingDirectory + file.Path);
+
                 //  if it has a match: focus!
-                if (justFilePattern.IsMatch(File.ReadAllText(repo.Info.WorkingDirectory + file.Path)))
+                if (justFilePattern.IsMatch(fileContent))
                 {
                     // get all matches in links
                     var oldInboundLinks = Regex.Match(
-                        File.ReadAllText(repo.Info.WorkingDirectory + file.Path),
+                        fileContent,
                         @"(?<=\]\()\S*" + originalFileName
                     );
 
@@ -501,7 +507,7 @@ namespace CSITools
                     {
                         // this means likely we have reference links. booo:
                         oldInboundLinks = Regex.Match(
-                            File.ReadAllText(repo.Info.WorkingDirectory + file.Path),
+                            fileContent,
                             @"(?<=\]:).+?" + originalFileName
                         );
                         if (!oldInboundLinks.Success)
@@ -523,13 +529,12 @@ namespace CSITools
                     }
                     newInboundLink = newInboundLink.Replace(@"\", @"/");
 
-
                     // for each link match, replace that with the new, relative link.
                     // BUG: if the file is the same name but in a different location, we need to do this only once for all things.
                     string replaceText = "";
                     try
                     {
-                        replaceText = File.ReadAllText(repo.Info.WorkingDirectory + file.Path).Replace(oldInboundLinks.Value, newInboundLink);
+                        replaceText = fileContent.Replace(oldInboundLinks.Value, newInboundLink);
                     }
                     catch (Exception ex)
                     {
