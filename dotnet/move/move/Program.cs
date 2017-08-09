@@ -69,26 +69,29 @@ namespace links
             GitMover mover = null;
             try
             {
-                using (mover = new GitMover(repoDir, options.Source, options.Destination, options.Redirect, options.Continue))
-                {
-                    mover.Move();
-                }
+                mover = new GitMover(repoDir, options.Source, options.Destination, options.Redirect, options.Continue, options.DoCommit);
+                mover.Move();
             }
             catch (Exception ex)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Error: {0} ", ex.Message);
+                Console.WriteLine("Stack trace: {0} ", ex.StackTrace);
                 Console.ResetColor();
 
                 if (mover != null)
                 {
+                    Console.WriteLine("Unwinding...");
                     mover.Unwind();
-                    mover.Dispose();
                 }
 
                 // Pause to allow user to view exception message
                 Console.WriteLine("\nHit ENTER to exit...");
                 Console.ReadLine();
+            }
+            finally
+            {
+                mover.Dispose();
             }
 
             Console.WriteLine("Done.");

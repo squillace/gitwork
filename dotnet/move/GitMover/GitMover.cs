@@ -37,7 +37,8 @@ namespace CSITools
         private string sourcePattern;
         private string targetPattern;
         private bool redirects;
-        private bool @continue;
+        private bool ignoreNonFatalErrors;
+        private bool _doCommit;
         Repository repo;
         private string originalFileContents;
 
@@ -56,16 +57,18 @@ namespace CSITools
         /// <param name="source">The target file path relative to the root of a repo. Can be either '\' or '/' usage.</param>
         /// <param name="target">The path of the new file relative to the root of a repo. Can be either '\' or '/' usage.</param>
         /// <param name="redirects">If true, creates a redirect file for the moved file. Default is false.</param>
-        /// <param name="commit">If true, commits the changes.</param>
-        public GitMover(string repoRootDir, string source, string target, bool redirects, bool commit)
+        /// <param name="ignoreNonFatal">If true, non-fatal errors are ignored and processing continues.</param>
+        /// <param name="doCommit">If true, commits the changes.</param>
+        public GitMover(string repoRootDir, string source, string target, bool redirects, bool ignoreNonFatal, bool doCommit)
         {
             this.repoWorkingRoot = repoRootDir;
             this.redirects = redirects;
-            this.@continue = commit;
+            this.ignoreNonFatalErrors = ignoreNonFatal;
             this.sourcePattern = source.Replace(@"/", @"\");
             this.targetPattern = target.Replace(@"/", @"\");
             this.repo = new Repository(repoRootDir);
             this.originalFileContents = File.ReadAllText(repoRootDir + sourcePattern);
+            _doCommit = doCommit;
 
             // Get the user settings from git config. This is necessary for
             // creating a Signature for commits, so if this fails, we bail.
@@ -127,8 +130,9 @@ namespace CSITools
             // just keep making edits.
             RewriteOutboundLinks();
             WriteRedirectFile();
-            CommitChanges();
 
+            if (_doCommit)
+                CommitChanges();
         }
 
         private void RewriteOutboundLinks()
@@ -343,7 +347,7 @@ namespace CSITools
 
                 if (targetIndexEntryFromRepo == null)
                 {
-                    if (this.@continue)
+                    if (this.ignoreNonFatalErrors)
                     {
                         Console.WriteLine($"Relinking file and cannot find linked file {targetFileName.ToLower()} or there are more than two possibilities.");
                         continue;
@@ -557,6 +561,7 @@ namespace CSITools
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(repo.Info.WorkingDirectory + targetPattern));
             }
+            Console.WriteLine($"Moving {sourcePattern} --> {targetPattern}");
             repo.Move(sourcePattern, targetPattern);
         }
 
@@ -583,6 +588,7 @@ namespace CSITools
                 {
                     try
                     {
+                        Console.WriteLine($"Moving {oldPath} --> {newPath}");
                         repo.Move(oldPath, newPath);
                     }
                     catch (Exception)
@@ -707,7 +713,7 @@ namespace CSITools
 
                 if (mediaIndexEntry.Count() == 0)
                 {
-                    if (this.@continue)
+                    if (this.ignoreNonFatalErrors)
                     {
                         Console.WriteLine($"Can't find the media {sourceMediaPath}; was it moved already? Check for the file in master.");
                         continue;
@@ -718,7 +724,7 @@ namespace CSITools
 
                 if (mediaIndexEntry.Count() != 1)
                 {
-                    if (this.@continue)
+                    if (this.ignoreNonFatalErrors)
                     {
                         Console.WriteLine($"Media file {sourceMediaPath} has more than one version. How's that possible?");
                         continue;

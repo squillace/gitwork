@@ -25,7 +25,10 @@ namespace links
         [Option('f', "redirect-file", HelpText = "Indicates that a moved file should be replaced with a redirect file to the new target. Default is false.", Required = false, DefaultValue = false)]
         public bool Redirect { get; set; }
 
-        [Option('c', "continue", HelpText = "Indicates that should a non-fatal error occur, as much work as is possible will complete and the error is reported for follow-up. Default is false.", Required = false, DefaultValue = true)]
+        [Option('c', "continue", HelpText = "Indicates that should a non-fatal error occur, as much work as is possible will complete and the error is reported for follow-up. Default is true.", Required = false, DefaultValue = true)]
         public bool Continue { get; set; }
+
+        [Option('t', "do-commit", HelpText = "Specifies whether changes should be automatically committed via 'git commit'. Default is false.", Required = false, DefaultValue = false)]
+        public bool DoCommit { get; set; }
     }
 }
