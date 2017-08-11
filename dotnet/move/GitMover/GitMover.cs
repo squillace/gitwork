@@ -642,7 +642,9 @@ namespace CSITools
 
             foreach (Match currentInternalMediaString in imagelinks)
             {
-                string oldMediaLink = (Regex.Match(currentInternalMediaString.Value, @"(?<=\]\().+?(?=\))")).Value;
+                // regex pulls file path from strings like: [JobStates](./media/storage-import-export-retrieving-state-info-for-a-job/JobStates.png "JobStates")
+                // old regex: (?<=\]\().+?(?=\)) ==> misses links that includes titles, like the above with "JobStates"
+                string oldMediaLink = (Regex.Match(currentInternalMediaString.Value, @"(?<=\]\().+?(?=[\ \)])")).Value;
 
                 // GetRelativePath takes an absolute path to a file and an absolute path to a directory
                 // and returns the relative path from the latter to the former.
@@ -695,7 +697,9 @@ namespace CSITools
             foreach (Match item in imagelinks)
             {
                 // relative path from the original file directory
-                string searchPath = (Regex.Match(item.Value, @"(?<=\]\().+?(?=\))")).Value;
+                // regex pulls file path from strings like: [JobStates](./media/storage-import-export-retrieving-state-info-for-a-job/JobStates.png "JobStates")
+                // old regex: (?<=\]\().+?(?=\)) ==> misses links that includes titles, like the above with "JobStates"
+                string searchPath = (Regex.Match(item.Value, @"(?<=\]\().+?(?=[\ \)])")).Value;
 
                 // original directory and file name
                 string sourceDir = Path.GetDirectoryName(sourcePattern);

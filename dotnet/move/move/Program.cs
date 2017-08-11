@@ -91,7 +91,8 @@ namespace links
             }
             finally
             {
-                mover.Dispose();
+                if(mover != null)
+                    mover.Dispose();
             }
 
             Console.WriteLine("Done.");
