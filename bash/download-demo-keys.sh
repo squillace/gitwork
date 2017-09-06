@@ -25,5 +25,6 @@ for key_file in $(az keyvault secret list --vault-name $vault --query "[].id" -o
             echo "we have a pub file, so we'll put it at $path/demo/$written_key_file"
         fi
         az keyvault secret download --name $key_file --vault-name $vault --file $path/demo/$written_key_file
+        # TODO: add ssh-add to the private key so that the CLI can understand it.
 done
 
