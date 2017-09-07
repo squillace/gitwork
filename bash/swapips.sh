@@ -24,8 +24,10 @@ if [[ $3 != "" && $4 == "" ]]; then
 fi
 
 if [[ $3 != "" && $4 != "" ]]; then
-    echo "gonna change something"
+    echo "gonna change the IP of: "
+    echo ""
     jsonARecord=$(az network dns record-set list -g $rg -z $domainZone -o json --query "[?type=='Microsoft.Network/dnszones/A' && name=='$recordName'].{\"aRecordName\":name,\"IP\":arecords[0].ipv4Address}[0]")
     echo "$jsonARecord"
+    echo ""
     az network dns record-set a delete -g $rg -z $domainZone -n "$recordName" && az network dns record-set a add-record --ipv4-address $newIP --record-set-name "$recordName" -g $rg -z $domainZone
 fi
