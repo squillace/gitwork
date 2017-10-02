@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
-using Mono.Options;
+using CommandLine;
 using CSITools;
-
 
 /*
 SPEC:
@@ -19,7 +19,6 @@ SPEC:
     2. Algorithm
         a) takes a file list as an argument in regular path format.
         b) takes a directory to place them in
-
  */
 
 namespace links
@@ -27,91 +26,78 @@ namespace links
     class MainClass
     {
 
-        private static bool redirects = false;
-        private static bool @continue = false;
-
         public static void Main(string[] args)
         {
-            string workingRepoDir = Directory.GetCurrentDirectory() + @"\";
-            bool show_help = false;
+            string repoDir = "";
 
-            var p = new OptionSet()
-            { 
-                /*{
-                    "d|directory",
-                    "Specifies the root directory of the repo to use; default is current directory.",
-                    (string v) => workingRepoDir = v
-                },
-                */
-                {
-                    "h|help",
-                    "Displays this help for \"move\"",
-                    v => show_help = v != null
-                },
-                { "r|redirect", "Indicates that moved file should be replaced with a redirect file to the new target; default is false.", v => redirects = true  },
-                { "c|continue", "Indicates that should a non-fatal error occur, as much work as is possible will complete and the error is reported for followup. Default is false.", v => @continue = true }
-            };
-
-            List<string> argList;
-
-            try {
-                argList = p.Parse (args);
-                Console.WriteLine(args);
-            }
-            catch (OptionException e) {
-                Console.Write ("move: ");
-                Console.WriteLine (e.Message);
-                Console.WriteLine ("Try 'move --help' for more information.");
-                return;
-            }
-
-            if (show_help) {
-                ShowHelp (p);
-                return;
-            }
-
-            GitMover mover = null;  
+            Options options = new Options();
             try
             {
-                mover = new GitMover(workingRepoDir, argList[0], argList[1], redirects, @continue);
+                if (CommandLine.Parser.Default.ParseArguments(args, options))
+                {
+                    if (options.ShowHelp)
+                    {
+                        Console.WriteLine(CommandLine.Text.HelpText.AutoBuild(options));
+                        //Exit the app without doing anything
+                        return;
+                    }
+
+                    if (String.IsNullOrEmpty(options.RepoDir))
+                    {
+                        // Use the current directory if the user didn't specify --repo-dir
+                        repoDir = Directory.GetCurrentDirectory() + @"\";
+                    }
+                    else
+                    {
+                        repoDir = options.RepoDir + @"\";
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Command line arguments not parsed successfully. Raw args were:");
+                    Console.WriteLine(String.Join(" | ", args));
+                }
+            }
+            catch (Exception e)
+            {
+                Console.Write("move: ");
+                Console.WriteLine(e.Message);
+                Console.WriteLine("Try 'move --help' for more information.");
+                return;
+            }
+            
+            GitMover mover = null;
+            try
+            {
+                mover = new GitMover(repoDir, options.Source, options.Destination, options.Redirect, options.Continue, options.DoCommit);
                 mover.Move();
-                mover.Dispose();
             }
             catch (Exception ex)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Error: {0} ", ex.Message);
+                Console.WriteLine("Stack trace: {0} ", ex.StackTrace);
                 Console.ResetColor();
-                //ShowHelp(p);
+
                 if (mover != null)
                 {
+                    Console.WriteLine("Unwinding...");
                     mover.Unwind();
-                    mover.Dispose();
                 }
+
+                // Pause to allow user to view exception message
+                Console.WriteLine("\nHit ENTER to exit...");
+                Console.ReadLine();
             }
-            Console.WriteLine("done");
-            // Console.ReadLine();
+            finally
+            {
+                if(mover != null)
+                    mover.Dispose();
+            }
 
-
+            Console.WriteLine("Done.");
         }
-
-        static void ShowHelp (OptionSet p)
-        {
-            Console.WriteLine ("Usage: move <source filespec> <target filespec>");
-            Console.WriteLine();
-            Console.WriteLine ("Where <source filespec> is the path from the root of a documentation directory, and <target filespec> is the same. Moves a single markdown file to the specified path, including media files, and rewrite all inbound links.");
-            Console.WriteLine ("NOTE: This program moves one file at a time.");
-            Console.WriteLine();
-            Console.WriteLine("Example in CMD.EXE: ");
-            Console.WriteLine();
-            Console.WriteLine("\t{0}> move.exe \"{1}\" \"{2}\"", @"C:\github\azure-docs-pr", @"articles\file.md", @"articles\directory\file.md");
-            Console.WriteLine();
-            Console.WriteLine ("Options:");
-            p.WriteOptionDescriptions (Console.Out);
-        }
-
     }
-
 }
 
 
